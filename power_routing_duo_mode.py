@@ -779,9 +779,256 @@ def demo_grid_layout() -> None:
 
 
 # =========================
+# Demo 3: larger 4-battery / 15-action example
+# =========================
+
+def demo_large_quad_battery_layout() -> None:
+    """
+    A larger example with 4 batteries and 15 action modules.
+
+    Grid layout (x increases to the right, y increases upward):
+
+        B1  M01 M02 M03 B2
+        M04 M05 M06 M07 M08
+        M09 M10 .   M11 M12
+        B3  M13 M14 M15 B4
+
+    Notes:
+        - Batteries sit at the four corners.
+        - One center cell is intentionally left empty to create a slightly
+          asymmetric routing problem.
+        - Edges are auto-created between 4-neighbor adjacent modules.
+    """
+    modules = {
+        "B1":  {"type": "battery", "pos": (0, 3)},
+        "M01": {"type": "action",  "pos": (1, 3)},
+        "M02": {"type": "action",  "pos": (2, 3)},
+        "M03": {"type": "action",  "pos": (3, 3)},
+        "B2":  {"type": "battery", "pos": (4, 3)},
+        "M04": {"type": "action",  "pos": (0, 2)},
+        "M05": {"type": "action",  "pos": (1, 2)},
+        "M06": {"type": "action",  "pos": (2, 2)},
+        "M07": {"type": "action",  "pos": (3, 2)},
+        "M08": {"type": "action",  "pos": (4, 2)},
+        "M09": {"type": "action",  "pos": (0, 1)},
+        "M10": {"type": "action",  "pos": (1, 1)},
+        "M11": {"type": "action",  "pos": (3, 1)},
+        "M12": {"type": "action",  "pos": (4, 1)},
+        "B3":  {"type": "battery", "pos": (0, 0)},
+        "M13": {"type": "action",  "pos": (1, 0)},
+        "M14": {"type": "action",  "pos": (2, 0)},
+        "M15": {"type": "action",  "pos": (3, 0)},
+        "B4":  {"type": "battery", "pos": (4, 0)},
+    }
+
+    g = ModularRobotGraph.from_grid_layout(modules)
+
+    print()
+    print("=" * 70)
+    print("DEMO 3A: Large 4-battery / 15-action planning example")
+    print("=" * 70)
+    print("Layout:")
+    print("  B1  M01 M02 M03 B2")
+    print("  M04 M05 M06 M07 M08")
+    print("  M09 M10 .   M11 M12")
+    print("  B3  M13 M14 M15 B4")
+
+    table = g.all_battery_distance_table(
+        weighted=False,
+        respect_switch_state=False,
+    )
+    print_distance_table(table)
+
+    assignments = g.nearest_battery_assignment(
+        weighted=False,
+        respect_switch_state=False,
+    )
+    print_assignments(assignments)
+
+    plan = g.recommend_switch_plan(
+        weighted=False,
+        respect_switch_state=False,
+    )
+    print("Recommended switch plan:")
+    print("  required_open_switches   =", plan["required_open_switches"])
+    print("  recommended_closed_switches =", plan["recommended_closed_switches"])
+    print("  unreachable_modules      =", plan["unreachable_modules"])
+
+    print()
+    print("=" * 70)
+    print("DEMO 3B: Runtime mode with B1 unavailable and two links closed")
+    print("=" * 70)
+    print("Scenario:")
+    print("  - B1 is treated as unavailable")
+    print("  - close S_B1_M01 to disconnect B1 physically")
+    print("  - close S_M06_M07 and S_M13_M10 to create local detours")
+
+    g.set_switch_state("S_B1_M01", False)
+    g.set_switch_state("S_M06_M07", False)
+    g.set_switch_state("S_M13_M10", False)
+
+    runtime_batteries = ["B2", "B3", "B4"]
+
+    runtime_table = g.all_battery_distance_table(
+        batteries=runtime_batteries,
+        weighted=False,
+        respect_switch_state=True,
+    )
+    print_distance_table(runtime_table)
+
+    runtime_assignments = g.nearest_battery_assignment(
+        batteries=runtime_batteries,
+        weighted=False,
+        respect_switch_state=True,
+    )
+    print_assignments(runtime_assignments)
+
+    runtime_plan = g.recommend_switch_plan(
+        active_modules=["M01", "M02", "M03", "M06", "M07", "M10", "M11", "M14", "M15"],
+        batteries=runtime_batteries,
+        weighted=False,
+        respect_switch_state=True,
+    )
+    print("Runtime active-module switch summary:")
+    print("  required_open_switches   =", runtime_plan["required_open_switches"])
+    print("  recommended_closed_switches =", runtime_plan["recommended_closed_switches"])
+    print("  unreachable_modules      =", runtime_plan["unreachable_modules"])
+
+
+# =========================
+# Demo 4: articulated arm-like layout
+# =========================
+
+def demo_articulated_arm_layout() -> None:
+    """
+    A more irregular example with 5 batteries and 20 action modules.
+
+    The shape is intentionally "arm-like": multiple L-shaped bends,
+    branch points, and a few local cross-links that allow rerouting.
+
+    Grid layout:
+
+        B1  M01 M02
+                M03
+        M19 M18 M04 B2 M05
+        B5     M17     M06 M20
+        M15 M14 M16 M08 M07 B3
+            M13     M09
+        B4  M12 M11 M10
+    """
+    modules = {
+        "B1":  {"type": "battery", "pos": (0, 6)},
+        "M01": {"type": "action",  "pos": (1, 6)},
+        "M02": {"type": "action",  "pos": (2, 6)},
+        "M03": {"type": "action",  "pos": (2, 5)},
+        "M19": {"type": "action",  "pos": (0, 4)},
+        "M18": {"type": "action",  "pos": (1, 4)},
+        "M04": {"type": "action",  "pos": (2, 4)},
+        "B2":  {"type": "battery", "pos": (3, 4)},
+        "M05": {"type": "action",  "pos": (4, 4)},
+        "B5":  {"type": "battery", "pos": (0, 3)},
+        "M17": {"type": "action",  "pos": (2, 3)},
+        "M06": {"type": "action",  "pos": (4, 3)},
+        "M20": {"type": "action",  "pos": (5, 3)},
+        "M15": {"type": "action",  "pos": (0, 2)},
+        "M14": {"type": "action",  "pos": (1, 2)},
+        "M16": {"type": "action",  "pos": (2, 2)},
+        "M08": {"type": "action",  "pos": (3, 2)},
+        "M07": {"type": "action",  "pos": (4, 2)},
+        "B3":  {"type": "battery", "pos": (5, 2)},
+        "M13": {"type": "action",  "pos": (1, 1)},
+        "M09": {"type": "action",  "pos": (3, 1)},
+        "B4":  {"type": "battery", "pos": (0, 0)},
+        "M12": {"type": "action",  "pos": (1, 0)},
+        "M11": {"type": "action",  "pos": (2, 0)},
+        "M10": {"type": "action",  "pos": (3, 0)},
+    }
+
+    g = ModularRobotGraph.from_grid_layout(modules)
+
+    print()
+    print("=" * 70)
+    print("DEMO 4A: 5-battery articulated arm planning example")
+    print("=" * 70)
+    print("Layout:")
+    print("  B1  M01 M02")
+    print("          M03")
+    print("  M19 M18 M04 B2 M05")
+    print("  B5     M17     M06 M20")
+    print("  M15 M14 M16 M08 M07 B3")
+    print("      M13     M09")
+    print("  B4  M12 M11 M10")
+
+    table = g.all_battery_distance_table(
+        weighted=False,
+        respect_switch_state=False,
+    )
+    print_distance_table(table)
+
+    assignments = g.nearest_battery_assignment(
+        weighted=False,
+        respect_switch_state=False,
+    )
+    print_assignments(assignments)
+
+    plan = g.recommend_switch_plan(
+        weighted=False,
+        respect_switch_state=False,
+    )
+    print("Recommended switch plan:")
+    print("  required_open_switches   =", plan["required_open_switches"])
+    print("  recommended_closed_switches =", plan["recommended_closed_switches"])
+    print("  unreachable_modules      =", plan["unreachable_modules"])
+
+    print()
+    print("=" * 70)
+    print("DEMO 4B: Runtime mode with joint failures and one dead battery")
+    print("=" * 70)
+    print("Scenario:")
+    print("  - B2 is unavailable and excluded from the active battery list")
+    print("  - close S_M04_B2 to isolate the dead battery physically")
+    print("  - close S_M16_M17 and S_M09_M08 to simulate elbow joint faults")
+    print("  - close S_M06_M20 to cut one distal branch")
+
+    g.set_switch_state("S_M04_B2", False)
+    g.set_switch_state("S_M16_M17", False)
+    g.set_switch_state("S_M09_M08", False)
+    g.set_switch_state("S_M06_M20", False)
+
+    runtime_batteries = ["B1", "B3", "B4", "B5"]
+
+    runtime_table = g.all_battery_distance_table(
+        batteries=runtime_batteries,
+        weighted=False,
+        respect_switch_state=True,
+    )
+    print_distance_table(runtime_table)
+
+    runtime_assignments = g.nearest_battery_assignment(
+        batteries=runtime_batteries,
+        weighted=False,
+        respect_switch_state=True,
+    )
+    print_assignments(runtime_assignments)
+
+    runtime_plan = g.recommend_switch_plan(
+        active_modules=["M02", "M03", "M06", "M07", "M08", "M10", "M13", "M16", "M17", "M20"],
+        batteries=runtime_batteries,
+        weighted=False,
+        respect_switch_state=True,
+    )
+    print("Runtime active-module switch summary:")
+    print("  required_open_switches   =", runtime_plan["required_open_switches"])
+    print("  recommended_closed_switches =", runtime_plan["recommended_closed_switches"])
+    print("  unreachable_modules      =", runtime_plan["unreachable_modules"])
+
+
+# =========================
 # Main
 # =========================
 
 if __name__ == "__main__":
     demo_manual_l_shape()
     demo_grid_layout()
+    demo_large_quad_battery_layout()
+    demo_articulated_arm_layout()
