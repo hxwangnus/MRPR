@@ -694,6 +694,64 @@ def print_changed_modules(
         print(f"  {module}: {baseline[module].battery} -> {balanced[module].battery}")
 
 
+def build_cartesian_layout_array(
+    node_pos: Dict[str, Tuple[int, int]],
+    *,
+    grid_size: int = 10,
+) -> List[List[str]]:
+    """
+    Build a Cartesian occupancy grid addressed as layout[x][y].
+
+    This keeps the module coordinates unchanged while embedding the demo inside
+    a fixed-size 2D plane, e.g. B4 at layout[0][0] and B1 at layout[0][6].
+    """
+    layout = [["." for _ in range(grid_size)] for _ in range(grid_size)]
+
+    for node_id, (x, y) in node_pos.items():
+        if not (0 <= x < grid_size and 0 <= y < grid_size):
+            raise ValueError(
+                f"Node {node_id} at {(x, y)} is outside the {grid_size}x{grid_size} layout."
+            )
+        if layout[x][y] != ".":
+            raise ValueError(
+                f"Duplicate node placement at {(x, y)}: {node_id} conflicts with {layout[x][y]}."
+            )
+        layout[x][y] = node_id
+
+    return layout
+
+
+def print_cartesian_layout(layout: List[List[str]]) -> None:
+    """
+    Print the full 2D Cartesian layout.
+
+    The storage convention is layout[x][y], with x increasing to the right and
+    y increasing upward.
+    """
+    if not layout:
+        print("  <empty layout>")
+        return
+
+    grid_size = len(layout)
+    if any(len(column) != grid_size for column in layout):
+        raise ValueError("layout must be a square grid stored as layout[x][y].")
+
+    cell_width = max(
+        3,
+        max(len(cell) for column in layout for cell in column),
+    )
+
+    print(
+        f"  Cartesian {grid_size}x{grid_size} grid "
+        "(layout[x][y], x -> right, y -> up, '.' = empty):"
+    )
+    x_axis = " ".join(f"{x:>{cell_width}}" for x in range(grid_size))
+    print(f"  y\\x | {x_axis}")
+    for y in range(grid_size - 1, -1, -1):
+        row = " ".join(f"{layout[x][y]:>{cell_width}}" for x in range(grid_size))
+        print(f"  {y:>3} | {row}")
+
+
 def build_demo3_graph() -> ModularRobotGraph:
     modules = {
         "B1":  {"type": "battery", "pos": (0, 3)},
@@ -754,7 +812,8 @@ def compare_modes(
     g: ModularRobotGraph,
     *,
     title: str,
-    layout_lines: List[str],
+    layout_lines: Optional[List[str]] = None,
+    layout_grid_size: Optional[int] = None,
     batteries: Optional[Iterable[str]] = None,
     modules: Optional[Iterable[str]] = None,
     respect_switch_state: bool,
@@ -779,8 +838,15 @@ def compare_modes(
     print(title)
     print("=" * 72)
     print("Layout:")
-    for line in layout_lines:
-        print(f"  {line}")
+    if layout_grid_size is not None:
+        print_cartesian_layout(
+            build_cartesian_layout_array(g.node_pos, grid_size=layout_grid_size)
+        )
+    elif layout_lines is not None:
+        for line in layout_lines:
+            print(f"  {line}")
+    else:
+        print("  <layout unavailable>")
     print_compact_assignments("Without balanced mode (original duo-mode behavior):", baseline)
     print_compact_assignments("With balanced mode (post-processed rebalance):", balanced)
     print_changed_modules(baseline, balanced)
@@ -816,20 +882,10 @@ def demo_compare_large_quad() -> None:
 
 
 def demo_compare_articulated_arm() -> None:
-    layout_lines = [
-        "B1  M01 M02",
-        "        M03",
-        "M19 M18 M04 B2 M05",
-        "B5     M17     M06 M20",
-        "M15 M14 M16 M08 M07 B3",
-        "    M13     M09",
-        "B4  M12 M11 M10",
-    ]
-
     compare_modes(
         build_demo4_graph(),
         title="DEMO 4A: 5-battery articulated arm on full topology",
-        layout_lines=layout_lines,
+        layout_grid_size=10,
         respect_switch_state=False,
     )
 
@@ -841,7 +897,7 @@ def demo_compare_articulated_arm() -> None:
     compare_modes(
         g_runtime,
         title="DEMO 4B: Articulated arm in runtime mode after battery/joint faults",
-        layout_lines=layout_lines,
+        layout_grid_size=10,
         batteries=["B1", "B3", "B4", "B5"],
         respect_switch_state=True,
     )
