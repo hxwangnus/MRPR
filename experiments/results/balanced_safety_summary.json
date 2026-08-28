@@ -1,0 +1,173 @@
+{
+  "configuration": {
+    "action_modules": 32,
+    "all_action_modules_active": true,
+    "base_seed": 20260720,
+    "battery_count": 4,
+    "edge_cost": 1.0,
+    "grid": "6x6",
+    "internal_oracle": "dynamic programming over load-vector states and equal-shortest-distance battery candidates",
+    "load_variance_definition": "sum((load - mean_load)^2)",
+    "outage_rates_percent": [
+      0,
+      10,
+      25
+    ],
+    "switch_plan_derivation": "union of assignment path_switches",
+    "trials_per_outage_rate": 200
+  },
+  "summary": [
+    {
+      "balanced": {
+        "cycle_rate_percent": 14.5,
+        "mean_load_spread": 6.465,
+        "mean_load_variance_sse": 37.7,
+        "mean_switch_count": 32.63,
+        "mean_total_route_distance": 68.105,
+        "multi_battery_component_rate_percent": 38.0
+      },
+      "internal_equal_shortest_dp_oracle": {
+        "balanced_objective_match_rate_percent": 97.0,
+        "description": "Global count-load objective over equal-shortest-distance battery candidates; internal oracle, not a literature baseline",
+        "mean_balanced_load_spread_gap": 0.055,
+        "mean_balanced_load_variance_sse_gap": 0.06
+      },
+      "mean_unreachable_modules": 0,
+      "nearest": {
+        "cycle_rate_percent": 0.0,
+        "mean_load_spread": 10.745,
+        "mean_load_variance_sse": 81.24,
+        "mean_switch_count": 32,
+        "mean_total_route_distance": 68.105,
+        "multi_battery_component_rate_percent": 0.0
+      },
+      "outage_rate_percent": 0,
+      "trials": 200
+    },
+    {
+      "balanced": {
+        "cycle_rate_percent": 10.0,
+        "mean_load_spread": 7.215,
+        "mean_load_variance_sse": 43.9425,
+        "mean_switch_count": 32.45,
+        "mean_total_route_distance": 73.355,
+        "multi_battery_component_rate_percent": 38.0
+      },
+      "internal_equal_shortest_dp_oracle": {
+        "balanced_objective_match_rate_percent": 96.5,
+        "description": "Global count-load objective over equal-shortest-distance battery candidates; internal oracle, not a literature baseline",
+        "mean_balanced_load_spread_gap": 0.065,
+        "mean_balanced_load_variance_sse_gap": 0.07
+      },
+      "mean_unreachable_modules": 0.11,
+      "nearest": {
+        "cycle_rate_percent": 0.0,
+        "mean_load_spread": 11.535,
+        "mean_load_variance_sse": 98.4925,
+        "mean_switch_count": 31.89,
+        "mean_total_route_distance": 73.355,
+        "multi_battery_component_rate_percent": 0.0
+      },
+      "outage_rate_percent": 10,
+      "trials": 200
+    },
+    {
+      "balanced": {
+        "cycle_rate_percent": 5.0,
+        "mean_load_spread": 9.465,
+        "mean_load_variance_sse": 74.53,
+        "mean_switch_count": 31.415,
+        "mean_total_route_distance": 81.31,
+        "multi_battery_component_rate_percent": 26.0
+      },
+      "internal_equal_shortest_dp_oracle": {
+        "balanced_objective_match_rate_percent": 99.5,
+        "description": "Global count-load objective over equal-shortest-distance battery candidates; internal oracle, not a literature baseline",
+        "mean_balanced_load_spread_gap": 0.005,
+        "mean_balanced_load_variance_sse_gap": 0.01
+      },
+      "mean_unreachable_modules": 0.95,
+      "nearest": {
+        "cycle_rate_percent": 0.0,
+        "mean_load_spread": 12.45,
+        "mean_load_variance_sse": 116.12,
+        "mean_switch_count": 31.05,
+        "mean_total_route_distance": 81.31,
+        "multi_battery_component_rate_percent": 0.0
+      },
+      "outage_rate_percent": 25,
+      "trials": 200
+    }
+  ],
+  "targeted_diagnostics": {
+    "balanced_switch_plan_integration": {
+      "balanced_changes": [
+        {
+          "balanced_path": [
+            "B2",
+            "M01",
+            "M03",
+            "M06"
+          ],
+          "from": "B1",
+          "module": "M06",
+          "to": "B2"
+        }
+      ],
+      "balanced_manual_multi_battery_component": true,
+      "balanced_manual_switch_count": 8,
+      "nearest_multi_battery_component": false,
+      "nearest_switch_count": 7,
+      "recommend_switch_plan_equals_balanced": false,
+      "recommend_switch_plan_equals_nearest": true,
+      "topology": "3x3 grid; B1=(0,0), B2=(2,0)"
+    },
+    "dual_weighted_zero_cost_edge_case": {
+      "assigned_path_to_M": [
+        "B1",
+        "X",
+        "B2",
+        "M"
+      ],
+      "multi_battery_component": true,
+      "owner_of_source_B2_after_search": "B1",
+      "parent_of_source_B2_after_search": [
+        "X",
+        "S2"
+      ],
+      "required_open_switches": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "scope_note": "The dual-mode forest guarantee requires unweighted or strictly-positive weighted edges; zero cost is currently allowed",
+      "topology": "B1 --0-- X --0-- B2 --1-- M"
+    },
+    "tie_order_sensitivity": {
+      "reversed_loads": {
+        "B1": 4,
+        "B2": 3
+      },
+      "reversed_module_order_changes": [
+        {
+          "from": "B1",
+          "module": "M02",
+          "to": "B2"
+        }
+      ],
+      "same_final_load_vector": true,
+      "sorted_loads": {
+        "B1": 4,
+        "B2": 3
+      },
+      "sorted_module_order_changes": [
+        {
+          "from": "B1",
+          "module": "M20",
+          "to": "B2"
+        }
+      ],
+      "topology": "3x3 grid; B1=(0,0), B2=(2,2)"
+    }
+  }
+}

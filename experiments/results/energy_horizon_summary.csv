@@ -1,0 +1,5 @@
+method,mean_feasible_rounds,median_feasible_rounds,minimum_feasible_rounds,maximum_feasible_rounds,mean_gap_to_exact,exact_match_rate_percent
+dual_nearest_static,2.79,3.0,1,8,1.265,18.5
+balanced_static,3.12,3.0,1,8,0.935,29.0
+greedy_lifetime,3.96,4.0,2,8,0.095,91.0
+exact_restricted_repository_oracle,4.055,4.0,2,8,0,100.0

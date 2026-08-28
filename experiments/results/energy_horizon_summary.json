@@ -1,0 +1,71 @@
+{
+  "configuration": {
+    "action_module_count": 7,
+    "battery_capacity_distribution": "discrete uniform {30,35,...,60}",
+    "battery_count": 2,
+    "edge_cost": 1.0,
+    "electrical_caveat": "No current/voltage constraints, switching penalty, or multi-battery-domain isolation constraint",
+    "energy_model": "demand * (1 + route_distance)",
+    "exact_method_label": "restricted-model repository oracle; not a literature baseline",
+    "greedy_method_label": "one-step greedy lifetime heuristic",
+    "grid": "3x3",
+    "maximum_extra_route_cost_for_greedy_and_exact": 2.0,
+    "module_demand_distribution": "discrete uniform {0.5,0.75,1,1.25,1.5,2}",
+    "seed": 21160720,
+    "switch_state": "all available; planning mode",
+    "trials": 200
+  },
+  "method_summary": [
+    {
+      "exact_match_rate_percent": 18.5,
+      "maximum_feasible_rounds": 8,
+      "mean_feasible_rounds": 2.79,
+      "mean_gap_to_exact": 1.265,
+      "median_feasible_rounds": 3.0,
+      "method": "dual_nearest_static",
+      "minimum_feasible_rounds": 1
+    },
+    {
+      "exact_match_rate_percent": 29.0,
+      "maximum_feasible_rounds": 8,
+      "mean_feasible_rounds": 3.12,
+      "mean_gap_to_exact": 0.935,
+      "median_feasible_rounds": 3.0,
+      "method": "balanced_static",
+      "minimum_feasible_rounds": 1
+    },
+    {
+      "exact_match_rate_percent": 91.0,
+      "maximum_feasible_rounds": 8,
+      "mean_feasible_rounds": 3.96,
+      "mean_gap_to_exact": 0.095,
+      "median_feasible_rounds": 4.0,
+      "method": "greedy_lifetime",
+      "minimum_feasible_rounds": 2
+    },
+    {
+      "exact_match_rate_percent": 100.0,
+      "maximum_feasible_rounds": 8,
+      "mean_feasible_rounds": 4.055,
+      "mean_gap_to_exact": 0,
+      "median_feasible_rounds": 4.0,
+      "method": "exact_restricted_repository_oracle",
+      "minimum_feasible_rounds": 2
+    }
+  ],
+  "paired_comparisons": {
+    "balanced_vs_dual_nearest": {
+      "better_rate_percent": 23.5,
+      "equal_rate_percent": 76.0,
+      "mean_total_energy_difference_per_round": 0.0,
+      "worse_rate_percent": 0.5
+    }
+  },
+  "sanity_assertions": [
+    "Static dual-nearest horizon equals the nearest lifetime simulator",
+    "Balanced preserves every module's nearest route distance",
+    "Balanced preserves total per-round route energy",
+    "Balanced never worsens its count-load objective",
+    "Greedy lifetime horizon never exceeds the restricted exact horizon"
+  ]
+}

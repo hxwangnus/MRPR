@@ -24,12 +24,24 @@ The repo is a compact research/prototyping codebase with six standalone scripts:
 
 Everything uses only the Python standard library. There is no `requirements.txt`.
 
+## Algorithm Review and Experiments
+
+- [POWER_ROUTING_STUDY.md](/Users/hongxuan/Documents/MRPR/POWER_ROUTING_STUDY.md) contains code-faithful dual-mode and balanced flowcharts, a primary-literature comparison, theoretical guarantees and limitations, and experimental results.
+- [MRPR_Power_Routing_Study_Concise.pdf](/Users/hongxuan/Documents/MRPR/output/pdf/MRPR_Power_Routing_Study_Concise.pdf) is the nine-page concise edition: five content pages plus four strict flowchart sheets.
+- [MRPR_Power_Routing_Study.pdf](/Users/hongxuan/Documents/MRPR/output/pdf/MRPR_Power_Routing_Study.pdf) is the polished, print-ready PDF edition with vector flowcharts and mixed portrait/landscape layouts.
+- [experiments/benchmark_balanced_safety.py](/Users/hongxuan/Documents/MRPR/experiments/benchmark_balanced_safety.py) reproduces the nearest-vs-balanced load and switch-topology Monte Carlo study.
+- [experiments/benchmark_energy_horizon.py](/Users/hongxuan/Documents/MRPR/experiments/benchmark_energy_horizon.py) compares static nearest/balanced routing with the repository's greedy-lifetime and restricted exact methods under one shared energy-budget model.
+
+Important safety boundary: `rebalanced_nearest_battery_assignment()` still returns raw balanced assignments and independently reconstructed paths. Use `recommend_balanced_switch_plan()` before applying them: it validates the path union and fails closed if it would connect two battery domains. This is a topology gate, not a substitute for voltage/current and hardware interlocks.
+
+Dual-mode's battery-isolated-forest guarantee also assumes unweighted routing or strictly positive weighted edge costs. The current graph accepts zero-cost edges; a zero-cost weighted path can reparent a battery source. The study contains the counterexample and recommended guard.
+
 ## Shared Modeling Assumptions
 
 Across the repo, the common assumptions are:
 
 - Each action module is assigned to one battery at a time.
-- The routing cost is the number of traversed switches in unweighted mode.
+- The routing cost is the number of traversed links in unweighted mode. Legacy links use one switch; role-aware rotated-layout links use two endpoint switches per link, so minimizing hops also minimizes traversed switches.
 - Weighted mode uses `Edge.cost` and Dijkstra.
 - A disconnected module is reported as unreachable with infinite distance.
 - Switch plans are derived from the union of the selected shortest paths.
@@ -99,14 +111,17 @@ There are two related ideas here:
 
 - `dynamic_load_balanced_assignment(...)`: assign modules one by one, breaking ties by current battery load
 - `rebalanced_nearest_battery_assignment(...)`: start from the original nearest-battery solution, then move only modules that have another battery at exactly the same shortest distance
+- `recommend_balanced_switch_plan(...)`: turn the balanced assignments into endpoint switch states and fail closed on a multi-battery connected component
 
-The second method is the main one demonstrated in the file. It preserves shortest-path distance while improving load distribution whenever an equal-distance reassignment exists.
+The second method is the main one demonstrated in the file. It preserves shortest-path distance (within `math.isclose` tolerance in weighted mode) while applying only strictly improving equal-distance reassignments.
 
 The balancing objective is heuristic but clear:
 
 - reduce load spread across batteries
 - reduce load variance
-- keep deterministic behavior
+- use deterministic tie-breaking where implemented
+
+Equal-objective moves now use a persistent deterministic comparison key, removing the earlier last-scanned/input-order tie bug documented in the study.
 
 So this file is a good next step if the routing should still be "nearest" but you do not want lexicographic tie-breaking to overload one battery unnecessarily.
 
@@ -224,6 +239,7 @@ python3 power_routing_balanced.py
 python3 power_routing_dynamic.py
 python3 power_routing_lifetime.py
 python3 power_routing_exact.py
+python3 -m unittest discover -v
 ```
 
 What each script demonstrates:
@@ -271,3 +287,79 @@ plan = g.recommend_switch_plan(
 
 print(plan["required_open_switches"])
 ```
+
+## Role-Aware Layout JSON in Balanced Mode
+
+`power_routing_balanced.py` accepts the row-major rotated layout format used by
+the modular robot controller:
+
+```python
+from power_routing_balanced import ModularRobotGraph
+
+payload = {
+    "layout": {
+        "cols": 3,
+        "rows": 3,
+        "cells": [
+            ["M2(180d,[8,252,0])", "M3(90d,[1,252,0])", None],
+            ["M1(0d,[3,252,0])", "M4(90d,[2,252,0])", "M6(180d,[12,252,0])"],
+            [None, "M5(270d,[7,252,0])", None],
+        ],
+    }
+}
+
+graph = ModularRobotGraph.from_layout_json(payload, default_closed=False)
+plan = graph.recommend_balanced_switch_plan(
+    respect_switch_state=False,  # plan over the complete physical topology
+)
+
+print(plan["battery_loads"])               # {'M3': 2}
+print(plan["required_closed_switches"])
+print(plan["safe_to_apply"])               # True
+```
+
+The three values after the rotation are `[role, digital_io, unused]`. Role 1 is
+a battery; roles 2, 3, and 4 are powered loads; role 5 and all other currently
+undefined roles—including role 8—are relay modules. Relays are not counted in
+battery load, but shortest paths may traverse them. The digital-I/O byte is
+stored and exposed as both the integer value and an eight-bit string; it does
+not yet affect optimization.
+
+The first `cells` row is the physical top row. Every module gets `.top`,
+`.right`, `.bottom`, and `.left` local switch IDs. Rotation is counter-clockwise.
+For example, `M2(180d,...)` has `M2.top` facing grid-bottom and `M2.left` facing
+grid-right; `M3(90d,...)` has `M3.top` facing grid-left. The M2—M3 link therefore
+requires both `M2.left` and `M3.top`.
+
+At runtime, an adjacency is traversable only when both endpoint switches are
+closed. Use `set_switch_closed(...)` for the physical terminology. Balanced planning
+output includes assignments, per-battery load counts, required links,
+`required_closed_switches`, `recommended_open_switches`, and the topology gate
+`safe_to_apply`. The old
+`required_open_switches`/`recommended_closed_switches` keys remain as compatibility
+aliases because the original prototype used `open=True` to mean traversable.
+
+Empty grid locations can be `null`, `""`, or `"."`. The parser validates declared
+dimensions, duplicate module IDs, role range (1–16), digital-I/O byte range
+(0–255), and rotations (multiples of 90 degrees). The old `grid` key and cells
+without the three-value metadata remain supported for compatibility.
+
+Run the complete example and regenerate its SVG diagram with:
+
+```bash
+python3 examples/demo_balanced_role_layout.py
+```
+
+The reproducible 4×4 / three-battery example (seed `20260828`) can be run with:
+
+```bash
+python3 examples/demo_balanced_role_layout.py \
+  --input examples/complex_4x4_role_layout.json \
+  --output output/balanced_complex_4x4_demo.svg
+```
+
+In the generated SVG, module fill colors encode module type, colored links encode
+battery domains, and the `T/R/B/L` badges drawn on module edges identify the
+module-local top/right/bottom/left switches that must be closed. The right-hand
+close-switch section is valid JSON using the schema
+`{"close_switches": ["module.direction", ...]}` for downstream integration.

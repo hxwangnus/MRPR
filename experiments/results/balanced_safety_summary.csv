@@ -1,0 +1,7 @@
+outage_rate_percent,trials,method,mean_unreachable_modules,mean_load_spread,mean_load_variance_sse,mean_total_route_distance,mean_switch_count,multi_battery_component_rate_percent,cycle_rate_percent,balanced_internal_oracle_match_rate_percent,balanced_mean_load_spread_gap_to_internal_oracle,balanced_mean_load_variance_sse_gap_to_internal_oracle
+0,200,nearest,0,10.745,81.24,68.105,32,0.0,0.0,,,
+0,200,balanced,0,6.465,37.7,68.105,32.63,38.0,14.5,97.0,0.055,0.06
+10,200,nearest,0.11,11.535,98.4925,73.355,31.89,0.0,0.0,,,
+10,200,balanced,0.11,7.215,43.9425,73.355,32.45,38.0,10.0,96.5,0.065,0.07
+25,200,nearest,0.95,12.45,116.12,81.31,31.05,0.0,0.0,,,
+25,200,balanced,0.95,9.465,74.53,81.31,31.415,26.0,5.0,99.5,0.005,0.01

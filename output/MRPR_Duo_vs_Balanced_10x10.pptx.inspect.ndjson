@@ -1,0 +1,117 @@
+{"kind":"deck","id":"pr/xdaljk","name":"Deck"}
+{"kind":"layout","layoutId":"a102eabe-97a4-4061-9c4b-5ace37e87a0f","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"ffd66b16-2b54-4ba9-9c32-ce0bd309637e","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/6ryvfs","slide":1,"title":"MRPR · POWER ROUTING","textShapes":5}
+{"kind":"textbox","id":"sh/2dcnulkj","slide":1,"name":"supertitle-left","text":"MRPR · POWER ROUTING","textPreview":"MRPR · POWER ROUTING","textChars":20,"textLines":1,"bbox":[41.33,41.18,620,40]}
+{"kind":"textbox","id":"sh/p0n6p03a","slide":1,"name":"supertitle-right","text":"20 JULY 2026","textPreview":"20 JULY 2026","textChars":12,"textLines":1,"bbox":[955,41.18,283.67,40]}
+{"kind":"textbox","id":"sh/4fepwv2p","slide":1,"name":"deck-title","text":"Duo Mode vs\nBalanced Mode","textPreview":"Duo Mode vs | Balanced Mode","textChars":25,"textLines":2,"bbox":[41.33,288,1050,260]}
+{"kind":"textbox","id":"sh/r25oralg","slide":1,"name":"deck-subtitle","text":"30 deterministic layouts on a 10 × 10 grid","textPreview":"30 deterministic layouts on a 10 × 10 grid","textChars":42,"textLines":1,"bbox":[41.33,576,820,44]}
+{"kind":"textbox","id":"sh/q1w7y5kv","slide":1,"name":"deck-method","text":"Unweighted planning mode · 1–5 power sources · all action modules active","textPreview":"Unweighted planning mode · 1–5 power sources · all action modules active","textChars":72,"textLines":1,"bbox":[41.33,632,1050,30]}
+{"kind":"notes","id":"nt/6ryvfs","slide":1,"text":""}
+{"kind":"slide","id":"sl/lphfzi","slide":2,"title":"One source makes both modes identical","textShapes":11}
+{"kind":"textbox","id":"sh/b61032xo","slide":2,"name":"case-1-title","text":"One source makes both modes identical","textPreview":"One source makes both modes identical","textChars":37,"textLines":1,"bbox":[41.33,30,1197.33,54]}
+{"kind":"textbox","id":"sh/c7a1w7e9","slide":2,"name":"case-1-subtitle","text":"Cross / hub · 18 actions · 1 source · total route distance 50","textPreview":"Cross / hub · 18 actions · 1 source · total route distance 50","textChars":61,"textLines":1,"bbox":[41.33,86,1197.33,28]}
+{"kind":"textbox","id":"sh/x8ji5sfu","slide":2,"name":"case-1-legend-label","text":"Cell color = source owner","textPreview":"Cell color = source owner","textChars":25,"textLines":1,"bbox":[41.33,120,224,23]}
+{"kind":"shape","id":"sh/y9cjyxwz","slide":2,"name":"case-1-duo-panel","bbox":[41.33,151,581,470]}
+{"kind":"shape","id":"sh/zul072xk","slide":2,"name":"case-1-balanced-panel","bbox":[657.67,151,581,470]}
+{"kind":"textbox","id":"sh/kvu107e5","slide":2,"name":"case-1-duo-heading","text":"Duo mode · nearest source","textPreview":"Duo mode · nearest source","textChars":25,"textLines":1,"bbox":[65,164,530,31]}
+{"kind":"textbox","id":"sh/lw3i9cfq","slide":2,"name":"case-1-balanced-heading","text":"Balanced mode · equal-distance rebalance","textPreview":"Balanced mode · equal-distance rebalance","textChars":40,"textLines":1,"bbox":[681,164,530,31]}
+{"kind":"textbox","id":"sh/mxcj2hwb","slide":2,"name":"case-1-duo-loads","text":"Loads   B1 18","textPreview":"Loads   B1 18","textChars":13,"textLines":1,"bbox":[65,550,530,25]}
+{"kind":"textbox","id":"sh/7yl0bmxw","slide":2,"name":"case-1-duo-metrics","text":"Spread 0   ·   Load-SSE 0","textPreview":"Spread 0   ·   Load-SSE 0","textChars":25,"textLines":1,"bbox":[65,582,530,25]}
+{"kind":"textbox","id":"sh/fyhkfep8","slide":2,"name":"case-1-balanced-loads","text":"Loads   B1 18","textPreview":"Loads   B1 18","textChars":13,"textLines":1,"bbox":[681,550,530,25]}
+{"kind":"textbox","id":"sh/ex8jm9on","slide":2,"name":"case-1-balanced-metrics","text":"Spread 0   ·   Load-SSE 0","textPreview":"Spread 0   ·   Load-SSE 0","textChars":25,"textLines":1,"bbox":[681,582,530,25]}
+{"kind":"textbox","id":"sh/1kz2h47y","slide":2,"name":"case-1-takeaway","text":"0 / 18 owners changed · no alternative source · every shortest route is identical","textPreview":"0 / 18 owners changed · no alternative source · every shortest route is identical","textChars":81,"textLines":1,"bbox":[41.33,646,1120,25]}
+{"kind":"textbox","id":"sh/gjq1oj6t","slide":2,"name":"case-1-slide-number","text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[1184.18,672,54.48,20]}
+{"kind":"table","id":"tb/sv614n2d","slide":2,"name":"","rows":1,"cols":2,"preview":"B1 | identical owner map","bbox":[277,118,218,24]}
+{"kind":"table","id":"tb/dwfids3y","slide":2,"name":"","rows":11,"cols":11,"preview":"0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9","bbox":[158,205,348,330]}
+{"kind":"table","id":"tb/69oj2xkn","slide":2,"name":"","rows":11,"cols":11,"preview":"0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9","bbox":[774,205,348,330]}
+{"kind":"notes","id":"nt/lphfzi","slide":2,"text":""}
+{"kind":"slide","id":"sl/kf20u5","slide":3,"title":"Four tied modules cut the two-source spread from 9 to 1","textShapes":11}
+{"kind":"textbox","id":"sh/lkz2lgvm","slide":3,"name":"case-2-title","text":"Four tied modules cut the two-source spread from 9 to 1","textPreview":"Four tied modules cut the two-source spread from 9 to 1","textChars":55,"textLines":1,"bbox":[41.33,30,1197.33,54]}
+{"kind":"textbox","id":"sh/yh8jqlwb","slide":3,"name":"case-2-subtitle","text":"Cross / hub · 17 actions · 2 sources · total route distance 78","textPreview":"Cross / hub · 17 actions · 2 sources · total route distance 78","textChars":62,"textLines":1,"bbox":[41.33,86,1197.33,28]}
+{"kind":"textbox","id":"sh/jihkjqdg","slide":3,"name":"case-2-legend-label","text":"Cell color = source owner","textPreview":"Cell color = source owner","textChars":25,"textLines":1,"bbox":[41.33,120,224,23]}
+{"kind":"shape","id":"sh/wf61obe5","slide":3,"name":"case-2-duo-panel","bbox":[41.33,151,581,470]}
+{"kind":"shape","id":"sh/xgz2hgvq","slide":3,"name":"case-2-balanced-panel","bbox":[657.67,151,581,470]}
+{"kind":"textbox","id":"sh/atojm1wz","slide":3,"name":"case-2-duo-heading","text":"Duo mode · nearest source","textPreview":"Duo mode · nearest source","textChars":25,"textLines":1,"bbox":[65,164,530,31]}
+{"kind":"textbox","id":"sh/buxkf6dk","slide":3,"name":"case-2-balanced-heading","text":"Balanced mode · equal-distance rebalance","textPreview":"Balanced mode · equal-distance rebalance","textChars":40,"textLines":1,"bbox":[681,164,530,31]}
+{"kind":"textbox","id":"sh/or61kbet","slide":3,"name":"case-2-duo-loads","text":"Loads   B1 13   ·   B2 4","textPreview":"Loads   B1 13   ·   B2 4","textChars":24,"textLines":1,"bbox":[65,550,530,25]}
+{"kind":"textbox","id":"sh/9sf2dwve","slide":3,"name":"case-2-duo-metrics","text":"Spread 9   ·   Load-SSE 40.5","textPreview":"Spread 9   ·   Load-SSE 40.5","textChars":28,"textLines":1,"bbox":[65,582,530,25]}
+{"kind":"textbox","id":"sh/xcrat8za","slide":3,"name":"case-2-balanced-loads","text":"Loads   B1 9   ·   B2 8","textPreview":"Loads   B1 9   ·   B2 8","textChars":23,"textLines":1,"bbox":[681,550,530,25]}
+{"kind":"textbox","id":"sh/wbi903y5","slide":3,"name":"case-2-balanced-metrics","text":"Spread 1   ·   Load-SSE 0.5","textPreview":"Spread 1   ·   Load-SSE 0.5","textChars":27,"textLines":1,"bbox":[681,582,530,25]}
+{"kind":"textbox","id":"sh/ba9sryhk","slide":3,"name":"case-2-takeaway","text":"4 / 17 owners changed · total route distance 78 → 78 · every action keeps the same shortest distance","textPreview":"4 / 17 owners changed · total route distance 78 → 78 · every action keeps the same shortest distance","textChars":100,"textLines":1,"bbox":[41.33,646,1120,25]}
+{"kind":"textbox","id":"sh/apgrydgz","slide":3,"name":"case-2-slide-number","text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[1184.18,672,54.48,20]}
+{"kind":"table","id":"tb/atwzm5cv","slide":3,"name":"","rows":1,"cols":3,"preview":"B1 | B2 | ●  owner changed","bbox":[277,118,310,24]}
+{"kind":"table","id":"tb/bu5gfadg","slide":3,"name":"","rows":11,"cols":11,"preview":"0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9","bbox":[158,205,348,330]}
+{"kind":"table","id":"tb/cvehoful","slide":3,"name":"","rows":11,"cols":11,"preview":"0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9","bbox":[774,205,348,330]}
+{"kind":"notes","id":"nt/kf20u5","slide":3,"text":""}
+{"kind":"slide","id":"sl/5kyynd","slide":4,"title":"Equal-distance moves produce a perfect 7 / 7 / 7 split","textShapes":11}
+{"kind":"textbox","id":"sh/ml8vaxkz","slide":4,"name":"case-3-title","text":"Equal-distance moves produce a perfect 7 / 7 / 7 split","textPreview":"Equal-distance moves produce a perfect 7 / 7 / 7 split","textChars":54,"textLines":1,"bbox":[41.33,30,1197.33,54]}
+{"kind":"textbox","id":"sh/9oze5cja","slide":4,"name":"case-3-subtitle","text":"H-shaped frame · 21 actions · 3 sources · total route distance 74","textPreview":"H-shaped frame · 21 actions · 3 sources · total route distance 74","textChars":65,"textLines":1,"bbox":[41.33,86,1197.33,28]}
+{"kind":"textbox","id":"sh/onqdc725","slide":4,"name":"case-3-legend-label","text":"Cell color = source owner","textPreview":"Cell color = source owner","textChars":25,"textLines":1,"bbox":[41.33,120,224,23]}
+{"kind":"shape","id":"sh/bqhw7m1g","slide":4,"name":"case-3-duo-panel","bbox":[41.33,151,581,470]}
+{"kind":"shape","id":"sh/ap8vehkv","slide":4,"name":"case-3-balanced-panel","bbox":[657.67,151,581,470]}
+{"kind":"textbox","id":"sh/xsje9cjm","slide":4,"name":"case-3-duo-heading","text":"Duo mode · nearest source","textPreview":"Duo mode · nearest source","textChars":25,"textLines":1,"bbox":[65,164,530,31]}
+{"kind":"textbox","id":"sh/wradg721","slide":4,"name":"case-3-balanced-heading","text":"Balanced mode · equal-distance rebalance","textPreview":"Balanced mode · equal-distance rebalance","textChars":40,"textLines":1,"bbox":[681,164,530,31]}
+{"kind":"textbox","id":"sh/ju1wbm1s","slide":4,"name":"case-3-duo-loads","text":"Loads   B1 15   ·   B2 3   ·   B3 3","textPreview":"Loads   B1 15   ·   B2 3   ·   B3 3","textChars":35,"textLines":1,"bbox":[65,550,530,25]}
+{"kind":"textbox","id":"sh/ytsvihk7","slide":4,"name":"case-3-duo-metrics","text":"Spread 12   ·   Load-SSE 96","textPreview":"Spread 12   ·   Load-SSE 96","textChars":27,"textLines":1,"bbox":[65,582,530,25]}
+{"kind":"textbox","id":"sh/cjad832p","slide":4,"name":"case-3-balanced-loads","text":"Loads   B1 7   ·   B2 7   ·   B3 7","textPreview":"Loads   B1 7   ·   B2 7   ·   B3 7","textChars":34,"textLines":1,"bbox":[681,550,530,25]}
+{"kind":"textbox","id":"sh/dkju183u","slide":4,"name":"case-3-balanced-metrics","text":"Spread 0   ·   Load-SSE 0","textPreview":"Spread 0   ·   Load-SSE 0","textChars":25,"textLines":1,"bbox":[681,582,530,25]}
+{"kind":"textbox","id":"sh/qhsv6dkj","slide":4,"name":"case-3-takeaway","text":"8 / 21 owners changed · total route distance 74 → 74 · every action keeps the same shortest distance","textPreview":"8 / 21 owners changed · total route distance 74 → 74 · every action keeps the same shortest distance","textChars":100,"textLines":1,"bbox":[41.33,646,1120,25]}
+{"kind":"textbox","id":"sh/ri1czil4","slide":4,"name":"case-3-slide-number","text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[1184.18,672,54.48,20]}
+{"kind":"table","id":"tb/zm90byhc","slide":4,"name":"","rows":1,"cols":4,"preview":"B1 | B2 | B3 | ●  owner changed","bbox":[277,118,358,24]}
+{"kind":"table","id":"tb/yl0zit07","slide":4,"name":"","rows":11,"cols":11,"preview":"0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9","bbox":[158,205,348,330]}
+{"kind":"table","id":"tb/lorid8zi","slide":4,"name":"","rows":11,"cols":11,"preview":"0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9","bbox":[774,205,348,330]}
+{"kind":"notes","id":"nt/5kyynd","slide":4,"text":""}
+{"kind":"slide","id":"sl/5mov8h","slide":5,"title":"Four reassignments balance the four-source mesh at 9 each","textShapes":11}
+{"kind":"textbox","id":"sh/3ipo3mls","slide":5,"name":"case-4-title","text":"Four reassignments balance the four-source mesh at 9 each","textPreview":"Four reassignments balance the four-source mesh at 9 each","textChars":57,"textLines":1,"bbox":[41.33,30,1197.33,54]}
+{"kind":"textbox","id":"sh/4ji5wr2d","slide":5,"name":"case-4-subtitle","text":"Dense rectangular mesh · 36 actions · 4 sources · total route distance 92","textPreview":"Dense rectangular mesh · 36 actions · 4 sources · total route distance 92","textChars":73,"textLines":1,"bbox":[41.33,86,1197.33,28]}
+{"kind":"textbox","id":"sh/5kr65w3y","slide":5,"name":"case-4-legend-label","text":"Cell color = source owner","textPreview":"Cell color = source owner","textChars":25,"textLines":1,"bbox":[41.33,120,224,23]}
+{"kind":"shape","id":"sh/ql0nyhkj","slide":5,"name":"case-4-duo-panel","bbox":[41.33,151,581,470]}
+{"kind":"shape","id":"sh/r69o7ml4","slide":5,"name":"case-4-balanced-panel","bbox":[657.67,151,581,470]}
+{"kind":"textbox","id":"sh/s7i50r2p","slide":5,"name":"case-4-duo-heading","text":"Duo mode · nearest source","textPreview":"Duo mode · nearest source","textChars":25,"textLines":1,"bbox":[65,164,530,31]}
+{"kind":"textbox","id":"sh/d8r69w3u","slide":5,"name":"case-4-balanced-heading","text":"Balanced mode · equal-distance rebalance","textPreview":"Balanced mode · equal-distance rebalance","textChars":40,"textLines":1,"bbox":[681,164,530,31]}
+{"kind":"textbox","id":"sh/e90n21kf","slide":5,"name":"case-4-duo-loads","text":"Loads   B1 11   ·   B2 11   ·   B3 7   ·   B4 7","textPreview":"Loads   B1 11   ·   B2 11   ·   B3 7   ·   B4 7","textChars":47,"textLines":1,"bbox":[65,550,530,25]}
+{"kind":"textbox","id":"sh/za9ob6l0","slide":5,"name":"case-4-duo-metrics","text":"Spread 4   ·   Load-SSE 16","textPreview":"Spread 4   ·   Load-SSE 16","textChars":26,"textLines":1,"bbox":[65,582,530,25]}
+{"kind":"textbox","id":"sh/7m58na9w","slide":5,"name":"case-4-balanced-loads","text":"Loads   B1 9   ·   B2 9   ·   B3 9   ·   B4 9","textPreview":"Loads   B1 9   ·   B2 9   ·   B3 9   ·   B4 9","textChars":45,"textLines":1,"bbox":[681,550,530,25]}
+{"kind":"textbox","id":"sh/6lw7u5sb","slide":5,"name":"case-4-balanced-metrics","text":"Spread 0   ·   Load-SSE 0","textPreview":"Spread 0   ·   Load-SSE 0","textChars":25,"textLines":1,"bbox":[681,582,530,25]}
+{"kind":"textbox","id":"sh/tonqpkr2","slide":5,"name":"case-4-takeaway","text":"4 / 36 owners changed · total route distance 92 → 92 · every action keeps the same shortest distance","textPreview":"4 / 36 owners changed · total route distance 92 → 92 · every action keeps the same shortest distance","textChars":100,"textLines":1,"bbox":[41.33,646,1120,25]}
+{"kind":"textbox","id":"sh/snepwfah","slide":5,"name":"case-4-slide-number","text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[1184.18,672,54.48,20]}
+{"kind":"table","id":"tb/w36pkjyl","slide":5,"name":"","rows":1,"cols":5,"preview":"B1 | B2 | B3 | B4 | ●  owner changed","bbox":[277,118,406,24]}
+{"kind":"table","id":"tb/x4fqtof6","slide":5,"name":"","rows":11,"cols":11,"preview":"0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9","bbox":[158,205,348,330]}
+{"kind":"table","id":"tb/a1o7i9gf","slide":5,"name":"","rows":11,"cols":11,"preview":"0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9","bbox":[774,205,348,330]}
+{"kind":"notes","id":"nt/5mov8h","slide":5,"text":""}
+{"kind":"slide","id":"sl/33i4wy","slide":6,"title":"Three tie-aware moves improve the five-source split without detours","textShapes":11}
+{"kind":"textbox","id":"sh/f2dgzy1k","slide":6,"name":"case-5-title","text":"Three tie-aware moves improve the five-source split without detours","textPreview":"Three tie-aware moves improve the five-source split without detours","textChars":67,"textLines":1,"bbox":[41.33,30,1197.33,54]}
+{"kind":"textbox","id":"sh/03mhs325","slide":6,"name":"case-5-subtitle","text":"Twin rooms with a narrow bridge · 37 actions · 5 sources · total route distance 78","textPreview":"Twin rooms with a narrow bridge · 37 actions · 5 sources · total route distance 78","textChars":82,"textLines":1,"bbox":[41.33,86,1197.33,28]}
+{"kind":"textbox","id":"sh/14fi18jq","slide":6,"name":"case-5-legend-label","text":"Cell color = source owner","textPreview":"Cell color = source owner","textChars":25,"textLines":1,"bbox":[41.33,120,224,23]}
+{"kind":"shape","id":"sh/25ozudkb","slide":6,"name":"case-5-duo-panel","bbox":[41.33,151,581,470]}
+{"kind":"shape","id":"sh/n6x03i1w","slide":6,"name":"case-5-balanced-panel","bbox":[657.67,151,581,470]}
+{"kind":"textbox","id":"sh/o76hwn21","slide":6,"name":"case-5-duo-heading","text":"Duo mode · nearest source","textPreview":"Duo mode · nearest source","textChars":25,"textLines":1,"bbox":[65,164,530,31]}
+{"kind":"textbox","id":"sh/p8fi5sjm","slide":6,"name":"case-5-balanced-heading","text":"Balanced mode · equal-distance rebalance","textPreview":"Balanced mode · equal-distance rebalance","textChars":40,"textLines":1,"bbox":[681,164,530,31]}
+{"kind":"textbox","id":"sh/atozydk7","slide":6,"name":"case-5-duo-loads","text":"Loads   B1 9   ·   B2 9   ·   B3 6   ·   B4 9   ·   B5 4","textPreview":"Loads   B1 9   ·   B2 9   ·   B3 6   ·   B4 9   ·   B5 4","textChars":56,"textLines":1,"bbox":[65,550,530,25]}
+{"kind":"textbox","id":"sh/bux07i1s","slide":6,"name":"case-5-duo-metrics","text":"Spread 5   ·   Load-SSE 21.2","textPreview":"Spread 5   ·   Load-SSE 21.2","textChars":28,"textLines":1,"bbox":[65,582,530,25]}
+{"kind":"textbox","id":"sh/j25gbil0","slide":6,"name":"case-5-balanced-loads","text":"Loads   B1 9   ·   B2 7   ·   B3 6   ·   B4 8   ·   B5 7","textPreview":"Loads   B1 9   ·   B2 7   ·   B3 6   ·   B4 8   ·   B5 7","textChars":56,"textLines":1,"bbox":[681,550,530,25]}
+{"kind":"textbox","id":"sh/i1wf2dkf","slide":6,"name":"case-5-balanced-metrics","text":"Spread 3   ·   Load-SSE 5.2","textPreview":"Spread 3   ·   Load-SSE 5.2","textChars":27,"textLines":1,"bbox":[681,582,530,25]}
+{"kind":"textbox","id":"sh/547yds36","slide":6,"name":"case-5-takeaway","text":"3 / 37 owners changed · total route distance 78 → 78 · every action keeps the same shortest distance","textPreview":"3 / 37 owners changed · total route distance 78 → 78 · every action keeps the same shortest distance","textChars":100,"textLines":1,"bbox":[41.33,646,1120,25]}
+{"kind":"textbox","id":"sh/43ex4n2l","slide":6,"name":"case-5-slide-number","text":"6","textPreview":"6","textChars":1,"textLines":1,"bbox":[1184.18,672,54.48,20]}
+{"kind":"table","id":"tb/wby9kzyx","slide":6,"name":"","rows":1,"cols":6,"preview":"B1 | B2 | B3 | B4 | B5 | ●  owner changed","bbox":[277,118,454,24]}
+{"kind":"table","id":"tb/hc7ad4fi","slide":6,"name":"","rows":11,"cols":11,"preview":"0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9","bbox":[158,205,348,330]}
+{"kind":"table","id":"tb/u9gripgr","slide":6,"name":"","rows":11,"cols":11,"preview":"0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9","bbox":[774,205,348,330]}
+{"kind":"notes","id":"nt/33i4wy","slide":6,"text":""}
+{"kind":"slide","id":"sl/66cwr5","slide":7,"title":"Balanced mode cuts tie-driven load skew without detours","textShapes":11}
+{"kind":"textbox","id":"sh/3m9c7258","slide":7,"name":"aggregate-title","text":"Balanced mode cuts tie-driven load skew without detours","textPreview":"Balanced mode cuts tie-driven load skew without detours","textChars":55,"textLines":1,"bbox":[41.33,31,1197.33,56]}
+{"kind":"textbox","id":"sh/4nid07mt","slide":7,"name":"aggregate-subtitle","text":"30 connected 10 × 10 layouts · six topology families for each source count","textPreview":"30 connected 10 × 10 layouts · six topology families for each source count","textChars":74,"textLines":1,"bbox":[41.33,91,1197.33,28]}
+{"kind":"textbox","id":"sh/pobe9cne","slide":7,"name":"aggregate-chart-label","text":"Mean load spread (assigned-action count)","textPreview":"Mean load spread (assigned-action count)","textChars":40,"textLines":1,"bbox":[54,128,555,26]}
+{"kind":"shape","id":"sh/uh0vud4r","slide":7,"name":"aggregate-card-1","bbox":[657.68,137,580.99,142]}
+{"kind":"shape","id":"sh/fi9c3i5c","slide":7,"name":"aggregate-card-2","bbox":[657.68,301,580.99,142]}
+{"kind":"shape","id":"sh/gjidwnmx","slide":7,"name":"aggregate-card-3","bbox":[657.68,465,580.99,142]}
+{"kind":"textbox","id":"sh/hkru5sni","slide":7,"name":"aggregate-stat-1","text":"60.3%","textPreview":"60.3%","textChars":5,"textLines":1,"bbox":[689,156,190,60]}
+{"kind":"textbox","id":"sh/6tgvqd4v","slide":7,"name":"aggregate-stat-1-body","text":"lower mean load spread\n7.875 → 3.125 across 24 multi-source cases","textPreview":"lower mean load spread | 7.875 → 3.125 across 24 multi-source cases","textChars":65,"textLines":2,"bbox":[900,157,305,88]}
+{"kind":"textbox","id":"sh/7epczi50","slide":7,"name":"aggregate-stat-2","text":"81.9%","textPreview":"81.9%","textChars":5,"textLines":1,"bbox":[689,320,190,60]}
+{"kind":"textbox","id":"sh/rmlkzux8","slide":7,"name":"aggregate-stat-2-body","text":"lower mean load-SSE\n67.95 → 12.28","textPreview":"lower mean load-SSE | 67.95 → 12.28","textChars":33,"textLines":2,"bbox":[900,321,305,88]}
+{"kind":"textbox","id":"sh/qlcjqpgn","slide":7,"name":"aggregate-stat-3","text":"16 / 24","textPreview":"16 / 24","textChars":7,"textLines":1,"bbox":[689,484,190,60]}
+{"kind":"textbox","id":"sh/do321kfe","slide":7,"name":"aggregate-stat-3-body","text":"multi-source cases improved\n8 tied · 0 worse · all 30 preserved every route distance","textPreview":"multi-source cases improved | 8 tied · 0 worse · all 30 preserved every route distance","textChars":84,"textLines":2,"bbox":[900,485,305,92]}
+{"kind":"textbox","id":"sh/cnu1sfyt","slide":7,"name":"aggregate-footnote","text":"Load = assigned action-module count; Load-SSE = Σ(load − mean)². Curated tie-sensitive suite. Balanced assignment paths are not an electrically validated switch plan.","textPreview":"Load = assigned action-module count; Load-SSE = Σ(load − mean)². Curated tie-sensitive suite. Balanced assignment paths are not an electr...","textChars":166,"textLines":1,"bbox":[41.33,637,1120,41]}
+{"kind":"textbox","id":"sh/zq5k3ux4","slide":7,"name":"aggregate-slide-number","text":"7","textPreview":"7","textChars":1,"textLines":1,"bbox":[1184.18,672,54.48,20]}
+{"kind":"chart","id":"ch/2dw7yl8f","slide":7,"name":"","chartType":"bar","bbox":[41.33,158,575,455]}
+{"kind":"notes","id":"nt/66cwr5","slide":7,"text":""}
