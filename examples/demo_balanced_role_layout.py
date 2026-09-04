@@ -33,6 +33,18 @@ def _assignment_loads(
     return loads
 
 
+def _assignment_demands(
+    graph: ModularRobotGraph,
+    batteries: List[str],
+    assignments: Dict[str, Any],
+) -> Dict[str, float]:
+    demands = {battery: 0.0 for battery in batteries}
+    for module, assignment in assignments.items():
+        if assignment.battery in demands:
+            demands[assignment.battery] += graph.get_module_demand_weight(module)
+    return demands
+
+
 def _svg_text(
     x: float,
     y: float,
@@ -116,8 +128,14 @@ def render_layout_svg(
     box_height = 106
 
     battery_order = sorted(plan["battery_loads"])
+    demand_mode = plan.get("mode") == "demand_aware"
     baseline_loads = (
         _assignment_loads(battery_order, baseline)
+        if baseline is not None
+        else None
+    )
+    baseline_demands = (
+        _assignment_demands(graph, battery_order, baseline)
         if baseline is not None
         else None
     )
@@ -134,7 +152,7 @@ def render_layout_svg(
     json_lines = _layout_json_lines(graph)
     close_switch_json_lines = _close_switch_json_lines(plan)
     grid_bottom = grid_y + graph.grid_rows * cell_height
-    json_panel_y = grid_bottom + 140
+    json_panel_y = grid_bottom + 170
     json_line_height = 15
     json_panel_height = 62 + json_line_height * len(json_lines)
     height = max(
@@ -145,7 +163,8 @@ def render_layout_svg(
         + 28 * len(battery_order)
         + 51 * len(plan["assignments"])
         + 16 * len(close_switch_json_lines)
-        + 26 * len(moves),
+        + 26 * len(moves)
+        + (55 if demand_mode else 0),
     )
 
     centers: Dict[str, Tuple[float, float]] = {}
@@ -204,7 +223,17 @@ def render_layout_svg(
             f'height="{height}" viewBox="0 0 {width} {height}">'
         ),
         '<rect width="100%" height="100%" fill="#F8FAFC"/>',
-        _svg_text(44, 48, "MRPR balanced routing — role-aware layout", size=25, weight=700),
+        _svg_text(
+            44,
+            48,
+            (
+                "MRPR demand-aware routing — role-aware layout"
+                if demand_mode
+                else "MRPR balanced routing — role-aware layout"
+            ),
+            size=25,
+            weight=700,
+        ),
         _svg_text(
             44,
             75,
@@ -250,7 +279,10 @@ def render_layout_svg(
         x = center_x - box_width / 2
         y = center_y - box_height / 2
         metadata = graph.get_module_metadata(module)
-        role_line = f"role {metadata.role} · {metadata.role_name}"
+        role_line = (
+            f"role {metadata.role} · {metadata.role_name} "
+            f"· w={metadata.demand_weight:g}"
+        )
         rotation_line = (
             f"↺ {graph.module_rotation[module]}° · IO {metadata.digital_io_bits}"
         )
@@ -259,7 +291,7 @@ def render_layout_svg(
                 f'<rect x="{x}" y="{y}" width="{box_width}" height="{box_height}" '
                 f'rx="17" fill="{fill}" stroke="{stroke}" stroke-width="2.5"/>',
                 _svg_text(center_x, y + 30, module, size=21, weight=700, anchor="middle"),
-                _svg_text(center_x, y + 57, role_line, size=14, weight=600, anchor="middle"),
+                _svg_text(center_x, y + 57, role_line, size=12, weight=600, anchor="middle"),
                 _svg_text(
                     center_x,
                     y + 83,
@@ -338,15 +370,24 @@ def render_layout_svg(
     parts.append(_svg_text(panel_x + 24, y, "Optimization result", size=21, weight=700))
     y += 35
     if baseline_loads is not None:
+        baseline_metric = (
+            baseline_demands
+            if demand_mode and baseline_demands is not None
+            else baseline_loads
+        )
         nearest_summary = " · ".join(
-            f"{battery}={baseline_loads[battery]}"
+            f"{battery}={baseline_metric[battery]:g}"
             for battery in battery_order
         )
         parts.append(
             _svg_text(
                 panel_x + 24,
                 y,
-                f"Nearest loads: {nearest_summary}",
+                (
+                    f"Count-balanced demand: {nearest_summary}"
+                    if demand_mode
+                    else f"Nearest loads: {nearest_summary}"
+                ),
                 size=15,
                 weight=600,
                 fill="#526071",
@@ -354,17 +395,29 @@ def render_layout_svg(
         )
         y += 28
         parts.append(
-            _svg_text(panel_x + 24, y, "Balanced loads", size=17, weight=700)
+            _svg_text(
+                panel_x + 24,
+                y,
+                "Demand-aware battery drain" if demand_mode else "Balanced loads",
+                size=17,
+                weight=700,
+            )
         )
         y += 27
 
     for battery, load in plan["battery_loads"].items():
         noun = "load module" if load == 1 else "load modules"
+        load_text = (
+            f"● {battery}: {plan['battery_effective_drain'][battery]:g} units "
+            f"· {load} modules"
+            if demand_mode
+            else f"● {battery} supplies {load} {noun}"
+        )
         parts.append(
             _svg_text(
                 panel_x + 24,
                 y,
-                f"● {battery} supplies {load} {noun}",
+                load_text,
                 size=17,
                 weight=700,
                 fill=domain_colors[battery],
@@ -372,13 +425,54 @@ def render_layout_svg(
         )
         y += 28
 
+    if demand_mode and baseline_demands is not None:
+        before_peak = max(baseline_demands.values())
+        after_peak = max(plan["battery_effective_drain"].values())
+        gain_percent = (
+            (before_peak / after_peak - 1.0) * 100.0
+            if after_peak > 0
+            else 0.0
+        )
+        parts.append(
+            _svg_text(
+                panel_x + 24,
+                y,
+                f"Peak drain {before_peak:g} → {after_peak:g}; "
+                f"lifetime ≈ +{gain_percent:.0f}% (equal capacity)",
+                size=13,
+                weight=700,
+                fill="#087A50",
+            )
+        )
+        y += 28
+        loss_factor = plan["route_loss_factor"]
+        parts.append(
+            _svg_text(
+                panel_x + 24,
+                y,
+                (
+                    "Switch-loss coefficient unknown; path cost is lexicographic"
+                    if loss_factor == 0
+                    else f"Switch-loss factor {loss_factor:g} included in effective drain"
+                ),
+                size=12,
+                weight=600,
+                fill="#526071",
+            )
+        )
+        y += 24
+
     if moves:
         y += 8
         parts.append(
             _svg_text(
                 panel_x + 24,
                 y,
-                "Equal-distance reassignments",
+                (
+                    "Demand-aware reassignments"
+                    if demand_mode
+                    else "Equal-distance reassignments"
+                ),
                 size=17,
                 weight=700,
             )
@@ -479,8 +573,8 @@ def render_layout_svg(
     legend_y = grid_y + graph.grid_rows * cell_height + 44
     legend_items = [
         ("battery", "power source (role 1)"),
-        ("action", "powered load (roles 2/3/4)"),
-        ("relay", "unused relay (all other roles)"),
+        ("action", "powered load (roles 2–16)"),
+        ("relay", "routing-only relay (legacy)"),
     ]
     legend_x = 50
     for node_type, label in legend_items:
@@ -524,6 +618,16 @@ def render_layout_svg(
             fill="#526071",
         )
     )
+    parts.append(
+        _svg_text(
+            50,
+            domain_legend_y + 56,
+            "Demand weights: empty=1 · buffer1–11=2 · CPU=3 · navigation=4 · motor=5",
+            size=12,
+            weight=700,
+            fill="#344054",
+        )
+    )
 
     json_panel_x = grid_x + 5
     json_panel_width = graph.grid_cols * cell_width - 10
@@ -555,18 +659,48 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--optimizer",
+        choices=("balanced", "demand"),
+        default="balanced",
+    )
     args = parser.parse_args()
 
     payload = json.loads(args.input.read_text(encoding="utf-8"))
     graph = ModularRobotGraph.from_layout_json(payload, default_closed=False)
-    baseline = graph.nearest_battery_assignment(respect_switch_state=False)
-    plan = graph.recommend_balanced_switch_plan(respect_switch_state=False)
+    if args.optimizer == "demand":
+        count_plan = graph.recommend_balanced_switch_plan(
+            respect_switch_state=False,
+        )
+        baseline = count_plan["assignments"]
+        plan = graph.recommend_demand_aware_switch_plan(
+            respect_switch_state=False,
+        )
+    else:
+        baseline = graph.nearest_battery_assignment(respect_switch_state=False)
+        plan = graph.recommend_balanced_switch_plan(respect_switch_state=False)
     if not plan["safe_to_apply"]:
         raise RuntimeError(f"Unsafe battery connection: {plan['battery_conflicts']}")
 
     baseline_loads = _assignment_loads(graph.get_batteries(), baseline)
-    print("Nearest battery loads:", baseline_loads)
-    print("Battery loads:", plan["battery_loads"])
+    if args.optimizer == "demand":
+        baseline_demands = _assignment_demands(
+            graph,
+            graph.get_batteries(),
+            baseline,
+        )
+        print("Count-balanced module counts:", baseline_loads)
+        print("Count-balanced demands:", baseline_demands)
+        print("Demand-aware module counts:", plan["battery_loads"])
+        print("Demand-aware battery demands:", plan["battery_demands"])
+        print("Demand-aware objective:", plan["objective"])
+        print(
+            "Search:",
+            {"complete": plan["search_complete"], "states": plan["states_explored"]},
+        )
+    else:
+        print("Nearest battery loads:", baseline_loads)
+        print("Battery loads:", plan["battery_loads"])
     moves = [
         f"{module}: {baseline[module].battery}->{assignment.battery}"
         for module, assignment in sorted(plan["assignments"].items())
@@ -575,7 +709,8 @@ def main() -> None:
     print("Balanced moves:", moves or "none")
     for module, assignment in sorted(plan["assignments"].items()):
         print(
-            f"{module}: {assignment.battery}; path={assignment.path_nodes}; "
+            f"{module}: weight={graph.get_module_demand_weight(module):g}; "
+            f"battery={assignment.battery}; path={assignment.path_nodes}; "
             f"hops={int(assignment.distance)}; switches={assignment.switch_count}"
         )
     print("Close switches JSON:")

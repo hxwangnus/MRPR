@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1429" height="1427" viewBox="0 0 1429 1427">
+<svg xmlns="http://www.w3.org/2000/svg" width="1429" height="1456" viewBox="0 0 1429 1456">
 <rect width="100%" height="100%" fill="#F8FAFC"/>
-<text x="44" y="48" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="700" fill="#172033" text-anchor="start">MRPR balanced routing — role-aware layout</text>
+<text x="44" y="48" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="700" fill="#172033" text-anchor="start">MRPR demand-aware routing — role-aware layout</text>
 <text x="44" y="75" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="400" fill="#526071" text-anchor="start">Line colors show battery domains; T/R/B/L edge badges are the local switches to close.</text>
 <rect x="49" y="105" width="180" height="148" rx="16" fill="none" stroke="#D7DEE8" stroke-width="1.5" stroke-dasharray="5 6"/>
 <rect x="239" y="105" width="180" height="148" rx="16" fill="none" stroke="#D7DEE8" stroke-width="1.5" stroke-dasharray="5 6"/>
@@ -30,9 +30,9 @@
 <line x1="519.0" y1="495.0" x2="519.0" y2="653.0" stroke="#C8D1DC" stroke-width="3" stroke-linecap="round"/>
 <line x1="329.0" y1="337.0" x2="519.0" y2="337.0" stroke="#C8D1DC" stroke-width="3" stroke-linecap="round"/>
 <line x1="519.0" y1="337.0" x2="709.0" y2="337.0" stroke="#DF5A00" stroke-width="8" stroke-linecap="round"/>
-<line x1="139.0" y1="495.0" x2="139.0" y2="653.0" stroke="#079669" stroke-width="8" stroke-linecap="round"/>
+<line x1="139.0" y1="495.0" x2="139.0" y2="653.0" stroke="#C8D1DC" stroke-width="3" stroke-linecap="round"/>
 <line x1="709.0" y1="495.0" x2="709.0" y2="337.0" stroke="#DF5A00" stroke-width="8" stroke-linecap="round"/>
-<line x1="139.0" y1="653.0" x2="329.0" y2="653.0" stroke="#C8D1DC" stroke-width="3" stroke-linecap="round"/>
+<line x1="139.0" y1="653.0" x2="329.0" y2="653.0" stroke="#7C3AED" stroke-width="8" stroke-linecap="round"/>
 <line x1="329.0" y1="653.0" x2="519.0" y2="653.0" stroke="#7C3AED" stroke-width="8" stroke-linecap="round"/>
 <line x1="709.0" y1="179.0" x2="709.0" y2="337.0" stroke="#DF5A00" stroke-width="8" stroke-linecap="round"/>
 <rect x="257.0" y="442.0" width="144" height="106" rx="17" fill="#DCEBFF" stroke="#2563EB" stroke-width="2.5"/>
@@ -74,7 +74,7 @@
 <text x="139.0" y="630.0" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700" fill="#172033" text-anchor="middle">M08</text>
 <text x="139.0" y="657.0" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#172033" text-anchor="middle">role 4 · navigation · w=4</text>
 <text x="139.0" y="683.0" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#455468" text-anchor="middle">↺ 180° · IO 11111100</text>
-<circle cx="198.0" cy="693.0" r="6" fill="#079669"><title>M06 power domain</title></circle>
+<circle cx="198.0" cy="693.0" r="6" fill="#7C3AED"><title>M09 power domain</title></circle>
 <rect x="257.0" y="600.0" width="144" height="106" rx="17" fill="#FFF1B8" stroke="#B7791F" stroke-width="2.5"/>
 <text x="329.0" y="630.0" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700" fill="#172033" text-anchor="middle">M09</text>
 <text x="329.0" y="657.0" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#172033" text-anchor="middle">role 1 · battery · w=0</text>
@@ -131,11 +131,6 @@
 <text x="591.0" y="341.0" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800" fill="#DF5A00" text-anchor="middle">B</text>
 </g>
 <g>
-<title>M06.bottom — close local bottom switch</title>
-<rect x="126.0" y="537.0" width="26" height="22" rx="7" fill="#FFFFFF" stroke="#079669" stroke-width="2.5"/>
-<text x="139.0" y="552.0" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800" fill="#079669" text-anchor="middle">B</text>
-</g>
-<g>
 <title>M06.top — close local top switch</title>
 <rect x="126.0" y="431.0" width="26" height="22" rx="7" fill="#FFFFFF" stroke="#079669" stroke-width="2.5"/>
 <text x="139.0" y="446.0" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800" fill="#079669" text-anchor="middle">T</text>
@@ -146,9 +141,9 @@
 <text x="709.0" y="446.0" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800" fill="#DF5A00" text-anchor="middle">T</text>
 </g>
 <g>
-<title>M08.bottom — close local bottom switch</title>
-<rect x="126.0" y="589.0" width="26" height="22" rx="7" fill="#FFFFFF" stroke="#079669" stroke-width="2.5"/>
-<text x="139.0" y="604.0" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800" fill="#079669" text-anchor="middle">B</text>
+<title>M08.left — close local left switch</title>
+<rect x="198.0" y="642.0" width="26" height="22" rx="7" fill="#FFFFFF" stroke="#7C3AED" stroke-width="2.5"/>
+<text x="211.0" y="657.0" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800" fill="#7C3AED" text-anchor="middle">L</text>
 </g>
 <g>
 <title>M09.bottom — close local bottom switch</title>
@@ -159,6 +154,11 @@
 <title>M09.right — close local right switch</title>
 <rect x="316.0" y="589.0" width="26" height="22" rx="7" fill="#FFFFFF" stroke="#7C3AED" stroke-width="2.5"/>
 <text x="329.0" y="604.0" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800" fill="#7C3AED" text-anchor="middle">R</text>
+</g>
+<g>
+<title>M09.top — close local top switch</title>
+<rect x="244.0" y="642.0" width="26" height="22" rx="7" fill="#FFFFFF" stroke="#7C3AED" stroke-width="2.5"/>
+<text x="257.0" y="657.0" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800" fill="#7C3AED" text-anchor="middle">T</text>
 </g>
 <g>
 <title>M10.left — close local left switch</title>
@@ -185,61 +185,62 @@
 <rect x="434.0" y="642.0" width="26" height="22" rx="7" fill="#FFFFFF" stroke="#7C3AED" stroke-width="2.5"/>
 <text x="447.0" y="657.0" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800" fill="#7C3AED" text-anchor="middle">T</text>
 </g>
-<rect x="859" y="100" width="525" height="1302" rx="20" fill="#FFFFFF" stroke="#D7DEE8" stroke-width="1.5"/>
+<rect x="859" y="100" width="525" height="1331" rx="20" fill="#FFFFFF" stroke="#D7DEE8" stroke-width="1.5"/>
 <text x="883" y="136" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700" fill="#172033" text-anchor="start">Optimization result</text>
-<text x="883" y="171" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#526071" text-anchor="start">Nearest loads: M06=5 · M09=1 · M11=3</text>
-<text x="883" y="199" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#172033" text-anchor="start">Balanced loads</text>
-<text x="883" y="226" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#079669" text-anchor="start">● M06 supplies 3 load modules</text>
-<text x="883" y="254" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#7C3AED" text-anchor="start">● M09 supplies 3 load modules</text>
-<text x="883" y="282" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#DF5A00" text-anchor="start">● M11 supplies 3 load modules</text>
-<text x="883" y="318" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#172033" text-anchor="start">Equal-distance reassignments</text>
-<text x="883" y="344" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600" fill="#7C3AED" text-anchor="start">M01: M06 → M09</text>
-<text x="883" y="368" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600" fill="#7C3AED" text-anchor="start">M03: M06 → M09</text>
-<text x="883" y="406" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#172033" text-anchor="start">Shortest routes</text>
-<text x="883" y="434" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#7C3AED" text-anchor="start">M01: M09 → M01</text>
-<text x="901" y="456" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
-<text x="883" y="485" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#079669" text-anchor="start">M02: M06 → M02</text>
-<text x="901" y="507" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
-<text x="883" y="536" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#7C3AED" text-anchor="start">M03: M09 → M01 → M03</text>
-<text x="901" y="558" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">2 hops · 4 switches</text>
-<text x="883" y="587" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#079669" text-anchor="start">M04: M06 → M02 → M04</text>
-<text x="901" y="609" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">2 hops · 4 switches</text>
-<text x="883" y="638" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#DF5A00" text-anchor="start">M05: M11 → M05</text>
-<text x="901" y="660" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
-<text x="883" y="689" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#DF5A00" text-anchor="start">M07: M11 → M07</text>
-<text x="901" y="711" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
-<text x="883" y="740" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#079669" text-anchor="start">M08: M06 → M08</text>
-<text x="901" y="762" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
-<text x="883" y="791" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#DF5A00" text-anchor="start">M10: M11 → M10</text>
-<text x="901" y="813" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
-<text x="883" y="842" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#7C3AED" text-anchor="start">M12: M09 → M12</text>
-<text x="901" y="864" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
-<text x="883" y="898" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#172033" text-anchor="start">Close switches (JSON)</text>
-<rect x="879" y="910" width="485" height="330" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.25"/>
-<text x="893" y="927" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">{</text>
-<text x="893" y="941" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">  &quot;close_switches&quot;: [</text>
-<text x="893" y="955" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M01.left&quot;,</text>
-<text x="893" y="969" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M01.top&quot;,</text>
-<text x="893" y="983" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M02.bottom&quot;,</text>
-<text x="893" y="997" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M02.left&quot;,</text>
-<text x="893" y="1011" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M03.left&quot;,</text>
-<text x="893" y="1025" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M04.right&quot;,</text>
-<text x="893" y="1039" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M05.bottom&quot;,</text>
-<text x="893" y="1053" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M06.bottom&quot;,</text>
-<text x="893" y="1067" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M06.top&quot;,</text>
-<text x="893" y="1081" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M07.top&quot;,</text>
-<text x="893" y="1095" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M08.bottom&quot;,</text>
-<text x="893" y="1109" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M09.bottom&quot;,</text>
-<text x="893" y="1123" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M09.right&quot;,</text>
-<text x="893" y="1137" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M10.left&quot;,</text>
-<text x="893" y="1151" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M11.bottom&quot;,</text>
-<text x="893" y="1165" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M11.left&quot;,</text>
-<text x="893" y="1179" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M11.right&quot;,</text>
-<text x="893" y="1193" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M12.top&quot;</text>
-<text x="893" y="1207" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">  ]</text>
-<text x="893" y="1221" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">}</text>
-<text x="883" y="1254" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600" fill="#526071" text-anchor="start">Keep the other 30 local switches open</text>
-<text x="883" y="1277" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700" fill="#087A50" text-anchor="start">Topology gate: PASS — battery-isolated</text>
+<text x="883" y="171" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#526071" text-anchor="start">Count-balanced demand: M06=13 · M09=6 · M11=10</text>
+<text x="883" y="199" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#172033" text-anchor="start">Demand-aware battery drain</text>
+<text x="883" y="226" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#079669" text-anchor="start">● M06: 9 units · 2 modules</text>
+<text x="883" y="254" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#7C3AED" text-anchor="start">● M09: 10 units · 4 modules</text>
+<text x="883" y="282" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#DF5A00" text-anchor="start">● M11: 10 units · 3 modules</text>
+<text x="883" y="310" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" fill="#087A50" text-anchor="start">Peak drain 13 → 10; lifetime ≈ +30% (equal capacity)</text>
+<text x="883" y="338" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#526071" text-anchor="start">Switch-loss coefficient unknown; path cost is lexicographic</text>
+<text x="883" y="370" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#172033" text-anchor="start">Demand-aware reassignments</text>
+<text x="883" y="396" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600" fill="#7C3AED" text-anchor="start">M08: M06 → M09</text>
+<text x="883" y="434" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#172033" text-anchor="start">Shortest routes</text>
+<text x="883" y="462" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#7C3AED" text-anchor="start">M01: M09 → M01</text>
+<text x="901" y="484" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
+<text x="883" y="513" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#079669" text-anchor="start">M02: M06 → M02</text>
+<text x="901" y="535" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
+<text x="883" y="564" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#7C3AED" text-anchor="start">M03: M09 → M01 → M03</text>
+<text x="901" y="586" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">2 hops · 4 switches</text>
+<text x="883" y="615" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#079669" text-anchor="start">M04: M06 → M02 → M04</text>
+<text x="901" y="637" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">2 hops · 4 switches</text>
+<text x="883" y="666" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#DF5A00" text-anchor="start">M05: M11 → M05</text>
+<text x="901" y="688" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
+<text x="883" y="717" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#DF5A00" text-anchor="start">M07: M11 → M07</text>
+<text x="901" y="739" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
+<text x="883" y="768" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#7C3AED" text-anchor="start">M08: M09 → M08</text>
+<text x="901" y="790" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
+<text x="883" y="819" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#DF5A00" text-anchor="start">M10: M11 → M10</text>
+<text x="901" y="841" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
+<text x="883" y="870" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#7C3AED" text-anchor="start">M12: M09 → M12</text>
+<text x="901" y="892" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#526071" text-anchor="start">1 hop · 2 switches</text>
+<text x="883" y="926" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#172033" text-anchor="start">Close switches (JSON)</text>
+<rect x="879" y="938" width="485" height="330" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.25"/>
+<text x="893" y="955" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">{</text>
+<text x="893" y="969" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">  &quot;close_switches&quot;: [</text>
+<text x="893" y="983" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M01.left&quot;,</text>
+<text x="893" y="997" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M01.top&quot;,</text>
+<text x="893" y="1011" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M02.bottom&quot;,</text>
+<text x="893" y="1025" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M02.left&quot;,</text>
+<text x="893" y="1039" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M03.left&quot;,</text>
+<text x="893" y="1053" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M04.right&quot;,</text>
+<text x="893" y="1067" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M05.bottom&quot;,</text>
+<text x="893" y="1081" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M06.top&quot;,</text>
+<text x="893" y="1095" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M07.top&quot;,</text>
+<text x="893" y="1109" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M08.left&quot;,</text>
+<text x="893" y="1123" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M09.bottom&quot;,</text>
+<text x="893" y="1137" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M09.right&quot;,</text>
+<text x="893" y="1151" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M09.top&quot;,</text>
+<text x="893" y="1165" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M10.left&quot;,</text>
+<text x="893" y="1179" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M11.bottom&quot;,</text>
+<text x="893" y="1193" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M11.left&quot;,</text>
+<text x="893" y="1207" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M11.right&quot;,</text>
+<text x="893" y="1221" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">    &quot;M12.top&quot;</text>
+<text x="893" y="1235" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">  ]</text>
+<text x="893" y="1249" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#344054">}</text>
+<text x="883" y="1282" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600" fill="#526071" text-anchor="start">Keep the other 30 local switches open</text>
+<text x="883" y="1305" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700" fill="#087A50" text-anchor="start">Topology gate: PASS — battery-isolated</text>
 <rect x="50" y="760" width="18" height="18" rx="4" fill="#FFF1B8" stroke="#B7791F" stroke-width="2"/>
 <text x="78" y="776" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#172033" text-anchor="start">power source (role 1)</text>
 <rect x="255" y="760" width="18" height="18" rx="4" fill="#DCEBFF" stroke="#2563EB" stroke-width="2"/>

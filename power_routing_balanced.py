@@ -16,9 +16,18 @@ ROLE_NAMES: Dict[int, str] = {
     3: "cpu",
     4: "navigation",
     5: "empty",
+    **{role: f"buffer{role - 5}" for role in range(6, 17)},
+}
+ROLE_DEMAND_WEIGHTS: Dict[int, float] = {
+    1: 0.0,
+    2: 5.0,
+    3: 3.0,
+    4: 4.0,
+    5: 1.0,
+    **{role: 2.0 for role in range(6, 17)},
 }
 BATTERY_ROLES = frozenset({1})
-LOAD_ROLES = frozenset({2, 3, 4})
+LOAD_ROLES = frozenset(range(2, 17))
 _GRID_CELL_PATTERN = re.compile(
     r"""
     ^\s*
@@ -77,9 +86,7 @@ class ModuleMetadata:
 
     @property
     def role_name(self) -> str:
-        # Role 8 is intentionally treated as unused for routing, per the
-        # current requirement. Unknown roles up to 16 follow the same policy.
-        return ROLE_NAMES.get(self.role, "unused")
+        return ROLE_NAMES[self.role]
 
     @property
     def digital_io_bits(self) -> str:
@@ -92,6 +99,10 @@ class ModuleMetadata:
     @property
     def is_load(self) -> bool:
         return self.role in LOAD_ROLES
+
+    @property
+    def demand_weight(self) -> float:
+        return ROLE_DEMAND_WEIGHTS[self.role]
 
 
 @dataclass
@@ -117,6 +128,20 @@ class AssignmentResult:
     def switch_count(self) -> Optional[int]:
         """Number of physical endpoint switches traversed by this route."""
         return None if self.path_switches is None else len(self.path_switches)
+
+
+@dataclass(frozen=True)
+class DemandRouteCandidate:
+    """One module-to-battery route considered by demand-aware optimization."""
+
+    module: str
+    battery: str
+    demand_weight: float
+    distance: float
+    path_nodes: Tuple[str, ...]
+    path_switches: Tuple[str, ...]
+    effective_drain: float
+    weighted_route_cost: float
 
 
 class ModularRobotGraph:
@@ -369,6 +394,10 @@ class ModularRobotGraph:
         if module not in self.module_metadata:
             raise KeyError(f"Module {module!r} has no role metadata.")
         return self.module_metadata[module]
+
+    def get_module_demand_weight(self, module: str) -> float:
+        """Return the role-derived per-round demand for a role-aware module."""
+        return self.get_module_metadata(module).demand_weight
 
     def shortest_paths_from(
         self,
@@ -776,6 +805,381 @@ class ModularRobotGraph:
             "recommended_closed_switches": recommended_open,
         }
 
+    def recommend_demand_aware_switch_plan(
+        self,
+        *,
+        active_modules: Optional[Iterable[str]] = None,
+        batteries: Optional[Iterable[str]] = None,
+        module_weights: Optional[Mapping[str, float]] = None,
+        weighted: bool = False,
+        respect_switch_state: bool = False,
+        route_loss_factor: float = 0.0,
+        max_extra_cost: Optional[float] = None,
+        require_battery_isolation: bool = True,
+        max_search_states: int = 250_000,
+    ) -> Dict[str, Any]:
+        """
+        Optimize first-depletion lifetime for unequal module demands.
+
+        BFS first builds one minimum-hop route from every battery to every
+        reachable load by default. The legacy `weighted=True` option remains
+        available for callers that explicitly provide unequal edge costs. A
+        bounded exact branch-and-bound search then assigns loads globally with
+        the lexicographic objective below:
+
+        1. minimize maximum per-battery effective drain
+        2. minimize drain spread and variance
+        3. minimize total demand-weighted route cost
+        4. minimize the number of distinct closed switches
+
+        `route_loss_factor` models proportional transmission loss:
+
+            effective_drain = demand * (1 + route_loss_factor * route_cost)
+
+        It defaults to zero until switch-loss measurements are available. That
+        zero preserves the lexicographic demand-first policy; it does not claim
+        that physical switch loss is actually zero.
+        With equal battery capacities this primary objective maximizes the time
+        until the first battery is depleted under the current static model.
+
+        The search is exact when `search_complete` is True, over one
+        deterministic minimum-cost path for each module/battery pair. It does
+        not yet enumerate alternative equal-cost paths or model nonlinear
+        battery behavior, voltage/current limits, or shared-link congestion.
+        """
+        battery_list = sorted(dict.fromkeys(
+            list(batteries) if batteries is not None else self.get_batteries()
+        ))
+        module_list = list(dict.fromkeys(
+            list(active_modules) if active_modules is not None else self.get_actions()
+        ))
+        if not battery_list:
+            raise ValueError("Demand-aware optimization requires at least one battery.")
+        for battery in battery_list:
+            if battery not in self.node_type:
+                raise KeyError(f"Unknown battery node: {battery}")
+        for module in module_list:
+            if module not in self.node_type:
+                raise KeyError(f"Unknown active module: {module}")
+
+        if (
+            isinstance(route_loss_factor, bool)
+            or not isinstance(route_loss_factor, (int, float))
+            or not math.isfinite(route_loss_factor)
+            or route_loss_factor < 0
+        ):
+            raise ValueError("route_loss_factor must be a finite nonnegative number.")
+        if (
+            max_extra_cost is not None
+            and (
+                isinstance(max_extra_cost, bool)
+                or not isinstance(max_extra_cost, (int, float))
+                or not math.isfinite(max_extra_cost)
+                or max_extra_cost < 0
+            )
+        ):
+            raise ValueError("max_extra_cost must be None or a finite nonnegative number.")
+        if isinstance(max_search_states, bool) or not isinstance(max_search_states, int):
+            raise TypeError("max_search_states must be an integer.")
+        if max_search_states <= len(module_list):
+            raise ValueError(
+                "max_search_states must exceed the number of active modules."
+            )
+
+        overrides = dict(module_weights or {})
+        unknown_overrides = set(overrides) - set(module_list)
+        if unknown_overrides:
+            raise ValueError(
+                f"module_weights contains inactive/unknown IDs: {sorted(unknown_overrides)}."
+            )
+        demands: Dict[str, float] = {}
+        for module in module_list:
+            if module in overrides:
+                value = overrides[module]
+            elif module in self.module_metadata:
+                value = self.module_metadata[module].demand_weight
+            else:
+                # Legacy manually-typed action nodes retain unit demand.
+                value = 1.0
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(value)
+                or value <= 0
+            ):
+                raise ValueError(
+                    f"Demand weight for {module!r} must be a finite positive number."
+                )
+            demands[module] = float(value)
+
+        all_known_batteries = set(self.get_batteries())
+        shortest_cache: Dict[str, Tuple[Dict[str, float], ParentMap]] = {}
+        for battery in battery_list:
+            shortest_cache[battery] = self.shortest_paths_from(
+                battery,
+                weighted=weighted,
+                respect_switch_state=respect_switch_state,
+                blocked_nodes=all_known_batteries - {battery},
+            )
+
+        candidates_by_module: Dict[str, List[DemandRouteCandidate]] = {}
+        unreachable_modules: List[str] = []
+        for module in module_list:
+            raw: List[DemandRouteCandidate] = []
+            for battery in battery_list:
+                dist_map, parent = shortest_cache[battery]
+                if module not in dist_map:
+                    continue
+                path = self.reconstruct_path(parent, module)
+                if path is None:
+                    continue
+                path_nodes, path_switches = path
+                distance = dist_map[module]
+                demand = demands[module]
+                raw.append(DemandRouteCandidate(
+                    module=module,
+                    battery=battery,
+                    demand_weight=demand,
+                    distance=distance,
+                    path_nodes=tuple(path_nodes),
+                    path_switches=tuple(path_switches),
+                    effective_drain=demand * (
+                        1.0 + float(route_loss_factor) * distance
+                    ),
+                    weighted_route_cost=demand * distance,
+                ))
+
+            if raw and max_extra_cost is not None:
+                shortest_distance = min(candidate.distance for candidate in raw)
+                raw = [
+                    candidate
+                    for candidate in raw
+                    if candidate.distance <= shortest_distance + max_extra_cost
+                ]
+            raw.sort(key=lambda candidate: (
+                candidate.distance,
+                candidate.battery,
+            ))
+            candidates_by_module[module] = raw
+            if not raw:
+                unreachable_modules.append(module)
+
+        search_modules = sorted(
+            (module for module in module_list if candidates_by_module[module]),
+            key=lambda module: (
+                -demands[module],
+                len(candidates_by_module[module]),
+                module,
+            ),
+        )
+        battery_index = {
+            battery: index for index, battery in enumerate(battery_list)
+        }
+        suffix_min_drain = [0.0] * (len(search_modules) + 1)
+        for index in range(len(search_modules) - 1, -1, -1):
+            module = search_modules[index]
+            suffix_min_drain[index] = (
+                suffix_min_drain[index + 1]
+                + min(
+                    candidate.effective_drain
+                    for candidate in candidates_by_module[module]
+                )
+            )
+
+        best_key: Optional[Tuple[Any, ...]] = None
+        best_assignment: Optional[Dict[str, DemandRouteCandidate]] = None
+        best_switches: frozenset[str] = frozenset()
+        states_explored = 0
+        search_complete = True
+        safe_cache: Dict[frozenset[str], bool] = {frozenset(): True}
+        selected: Dict[str, DemandRouteCandidate] = {}
+
+        def switch_union_is_safe(switches: frozenset[str]) -> bool:
+            if not require_battery_isolation:
+                return True
+            cached = safe_cache.get(switches)
+            if cached is not None:
+                return cached
+            safe = not self.battery_conflicts_for_switches(switches)
+            safe_cache[switches] = safe
+            return safe
+
+        def objective_key(
+            drains: Tuple[float, ...],
+            route_cost: float,
+            switches: frozenset[str],
+        ) -> Tuple[Any, ...]:
+            values = list(drains)
+            mean = sum(values) / len(values)
+            spread = max(values) - min(values)
+            variance = sum((value - mean) ** 2 for value in values)
+            owner_key = tuple(
+                selected[module].battery
+                for module in sorted(selected)
+            )
+            return (
+                max(values),
+                spread,
+                variance,
+                route_cost,
+                len(switches),
+                owner_key,
+            )
+
+        def search(
+            index: int,
+            drains: Tuple[float, ...],
+            route_cost: float,
+            switches: frozenset[str],
+        ) -> None:
+            nonlocal best_key, best_assignment, best_switches
+            nonlocal states_explored, search_complete
+
+            if states_explored >= max_search_states:
+                search_complete = False
+                return
+            states_explored += 1
+
+            if best_key is not None:
+                total_lower_bound = sum(drains) + suffix_min_drain[index]
+                peak_lower_bound = max(
+                    max(drains),
+                    total_lower_bound / len(battery_list),
+                )
+                if peak_lower_bound > best_key[0] + 1e-12:
+                    return
+
+            if index == len(search_modules):
+                key = objective_key(drains, route_cost, switches)
+                if best_key is None or key < best_key:
+                    best_key = key
+                    best_assignment = dict(selected)
+                    best_switches = switches
+                return
+
+            module = search_modules[index]
+            ordered_candidates = sorted(
+                candidates_by_module[module],
+                key=lambda candidate: (
+                    max(
+                        drains[battery_index[candidate.battery]]
+                        + candidate.effective_drain,
+                        max(drains),
+                    ),
+                    candidate.weighted_route_cost,
+                    candidate.battery,
+                ),
+            )
+            for candidate in ordered_candidates:
+                battery_pos = battery_index[candidate.battery]
+                next_drains = list(drains)
+                next_drains[battery_pos] += candidate.effective_drain
+                if best_key is not None and max(next_drains) > best_key[0] + 1e-12:
+                    continue
+
+                next_switches = switches.union(candidate.path_switches)
+                if not switch_union_is_safe(next_switches):
+                    continue
+
+                selected[module] = candidate
+                search(
+                    index + 1,
+                    tuple(next_drains),
+                    route_cost + candidate.weighted_route_cost,
+                    next_switches,
+                )
+                del selected[module]
+
+        zero_drains = tuple(0.0 for _ in battery_list)
+        search(0, zero_drains, 0.0, frozenset())
+        if best_assignment is None or best_key is None:
+            qualifier = (
+                " within max_search_states"
+                if not search_complete
+                else ""
+            )
+            raise ValueError(
+                "No battery-isolated demand-aware assignment was found"
+                + qualifier
+                + "."
+            )
+
+        assignments: Dict[str, AssignmentResult] = {}
+        battery_loads = {battery: 0 for battery in battery_list}
+        battery_demands = {battery: 0.0 for battery in battery_list}
+        battery_effective_drain = {battery: 0.0 for battery in battery_list}
+        required_links: Set[Tuple[str, str]] = set()
+        for module in module_list:
+            candidate = best_assignment.get(module)
+            if candidate is None:
+                assignments[module] = AssignmentResult(
+                    module=module,
+                    battery=None,
+                    distance=math.inf,
+                    path_nodes=None,
+                    path_switches=None,
+                )
+                continue
+            assignments[module] = AssignmentResult(
+                module=module,
+                battery=candidate.battery,
+                distance=candidate.distance,
+                path_nodes=list(candidate.path_nodes),
+                path_switches=list(candidate.path_switches),
+            )
+            battery_loads[candidate.battery] += 1
+            battery_demands[candidate.battery] += candidate.demand_weight
+            battery_effective_drain[candidate.battery] += candidate.effective_drain
+            for u, v in zip(candidate.path_nodes, candidate.path_nodes[1:]):
+                required_links.add(self._norm_pair(u, v))
+
+        candidate_required = sorted(best_switches)
+        conflicts = self.battery_conflicts_for_switches(candidate_required)
+        safe_to_apply = not conflicts
+        required_closed = candidate_required if safe_to_apply else []
+        recommended_open = sorted(
+            set(self.switch_closed) - set(required_closed)
+        )
+        peak_drain, spread, variance, total_route_cost, _, _ = best_key
+        return {
+            "mode": "demand_aware",
+            "assignments": assignments,
+            "module_weights": dict(sorted(demands.items())),
+            "battery_loads": dict(sorted(battery_loads.items())),
+            "battery_demands": dict(sorted(battery_demands.items())),
+            "battery_effective_drain": dict(sorted(battery_effective_drain.items())),
+            "route_loss_factor": float(route_loss_factor),
+            "path_solver": "dijkstra" if weighted else "bfs",
+            "objective_order": [
+                "peak_effective_drain",
+                "drain_spread",
+                "drain_variance",
+                "total_demand_weighted_route_cost",
+                "closed_switch_count",
+            ],
+            "objective": {
+                "peak_effective_drain": peak_drain,
+                "drain_spread": spread,
+                "drain_variance": variance,
+                "total_demand_weighted_route_cost": total_route_cost,
+                "closed_switch_count": len(candidate_required),
+            },
+            "required_links": sorted(required_links),
+            "required_closed_switches": required_closed,
+            "close_switches": required_closed,
+            "recommended_open_switches": recommended_open,
+            "candidate_required_closed_switches": candidate_required,
+            "safe_to_apply": safe_to_apply,
+            "battery_conflicts": conflicts,
+            "unreachable_modules": sorted(unreachable_modules),
+            "search_complete": search_complete,
+            "states_explored": states_explored,
+            "max_search_states": max_search_states,
+            # Compatibility aliases retained for callers of the old prototype.
+            "required_open_switches": required_closed,
+            "recommended_closed_switches": recommended_open,
+        }
+
     def dynamic_load_balanced_assignment(
         self,
         modules: Iterable[str],
@@ -1102,9 +1506,10 @@ class ModularRobotGraph:
         `cells` is ordered top-to-bottom, then left-to-right. Empty cells may
         be null, "", or ".". Rotation must be a multiple of 90 degrees and is
         normalized to 0/90/180/270. The preferred cell syntax includes
-        `[role, digital_io, unused]`. Role 1 is a battery, roles 2/3/4 are
-        loads, and every other role (including 8 for now) is a relay: it is not
-        counted as a load but remains available to shortest paths.
+        `[role, digital_io, unused]`. Role 1 is a battery. Every role from 2
+        through 16 is a powered load: motor/cpu/navigation/empty are roles
+        2/3/4/5, while roles 6 through 16 are buffer1 through buffer11. Their
+        default demand weights are 5/3/4/1 and 2 respectively.
 
         The legacy `grid` key and `<id>(<rotation>d)` cell syntax remain
         supported. For legacy cells, node types can be supplied with

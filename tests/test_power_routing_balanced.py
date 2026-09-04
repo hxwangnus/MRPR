@@ -2,7 +2,11 @@ import json
 from pathlib import Path
 import unittest
 
-from power_routing_balanced import ModularRobotGraph
+from power_routing_balanced import (
+    ModularRobotGraph,
+    ROLE_DEMAND_WEIGHTS,
+    ROLE_NAMES,
+)
 
 
 SAMPLE_GRID = {
@@ -35,7 +39,7 @@ SAMPLE_ROLE_LAYOUT = {
 
 
 class RotatedGridTests(unittest.TestCase):
-    def test_complex_4x4_example_balances_three_batteries(self):
+    def test_complex_4x4_example_balances_weighted_battery_drain(self):
         example_path = (
             Path(__file__).resolve().parents[1]
             / "examples"
@@ -56,43 +60,57 @@ class RotatedGridTests(unittest.TestCase):
         self.assertEqual(len(roles) - roles.count(1) - roles.count(2), 7)
         self.assertEqual(null_count, 4)
 
-        baseline = graph.nearest_battery_assignment(respect_switch_state=False)
-        baseline_loads = {battery: 0 for battery in graph.get_batteries()}
-        for assignment in baseline.values():
-            baseline_loads[assignment.battery] += 1
-        plan = graph.recommend_balanced_switch_plan(respect_switch_state=False)
+        count_plan = graph.recommend_balanced_switch_plan(
+            respect_switch_state=False,
+        )
+        count_demands = {battery: 0.0 for battery in graph.get_batteries()}
+        for module, assignment in count_plan["assignments"].items():
+            count_demands[assignment.battery] += graph.get_module_demand_weight(module)
 
-        self.assertEqual(baseline_loads, {"M06": 4, "M09": 0, "M11": 2})
-        self.assertEqual(plan["battery_loads"], {"M06": 2, "M09": 2, "M11": 2})
+        plan = graph.recommend_demand_aware_switch_plan(
+            respect_switch_state=False,
+        )
+
+        self.assertEqual(count_plan["battery_loads"], {"M06": 3, "M09": 3, "M11": 3})
+        self.assertEqual(count_demands, {"M06": 13.0, "M09": 6.0, "M11": 10.0})
+        self.assertEqual(plan["battery_loads"], {"M06": 2, "M09": 4, "M11": 3})
+        self.assertEqual(plan["battery_demands"], {"M06": 9.0, "M09": 10.0, "M11": 10.0})
         self.assertEqual(
             {
                 module
                 for module, assignment in plan["assignments"].items()
-                if baseline[module].battery != assignment.battery
+                if count_plan["assignments"][module].battery != assignment.battery
             },
-            {"M03", "M04"},
+            {"M08"},
         )
         self.assertTrue(plan["safe_to_apply"])
+        self.assertTrue(plan["search_complete"])
+        self.assertEqual(plan["path_solver"], "bfs")
+        self.assertEqual(plan["route_loss_factor"], 0.0)
         self.assertEqual(plan["unreachable_modules"], [])
-        self.assertEqual(len(plan["required_closed_switches"]), 14)
+        self.assertEqual(plan["objective"]["peak_effective_drain"], 10.0)
+        self.assertEqual(len(plan["required_closed_switches"]), 18)
         for module, assignment in plan["assignments"].items():
-            self.assertEqual(assignment.distance, baseline[module].distance)
+            self.assertEqual(
+                assignment.distance,
+                count_plan["assignments"][module].distance,
+            )
 
-    def test_role_layout_drives_battery_load_and_relay_classification(self):
+    def test_role_layout_drives_battery_load_and_buffer_classification(self):
         graph = ModularRobotGraph.from_layout_json(SAMPLE_ROLE_LAYOUT)
 
         self.assertEqual(graph.get_batteries(), ["M3"])
-        self.assertEqual(graph.get_actions(), ["M1", "M4"])
-        self.assertEqual(graph.get_relays(), ["M2", "M5", "M6"])
+        self.assertEqual(graph.get_actions(), ["M1", "M2", "M4", "M5", "M6"])
+        self.assertEqual(graph.get_relays(), [])
         self.assertEqual(
             graph.node_type,
             {
-                "M2": "relay",
+                "M2": "action",
                 "M3": "battery",
                 "M1": "action",
                 "M4": "action",
-                "M6": "relay",
-                "M5": "relay",
+                "M6": "action",
+                "M5": "action",
             },
         )
 
@@ -102,8 +120,63 @@ class RotatedGridTests(unittest.TestCase):
         self.assertEqual(m3.digital_io, 252)
         self.assertEqual(m3.digital_io_bits, "11111100")
         self.assertEqual(m3.unused, 0)
-        self.assertEqual(graph.get_module_metadata("M2").role_name, "unused")
-        self.assertEqual(graph.get_module_metadata("M6").role_name, "unused")
+        self.assertEqual(graph.get_module_metadata("M2").role_name, "buffer3")
+        self.assertEqual(graph.get_module_metadata("M6").role_name, "buffer7")
+        self.assertEqual(graph.get_module_demand_weight("M1"), 3.0)
+        self.assertEqual(graph.get_module_demand_weight("M2"), 2.0)
+        self.assertEqual(graph.get_module_demand_weight("M4"), 5.0)
+
+    def test_role_names_and_default_demand_weights_cover_all_roles(self):
+        self.assertEqual(ROLE_NAMES[5], "empty")
+        self.assertEqual(ROLE_DEMAND_WEIGHTS[5], 1.0)
+        for role in range(6, 17):
+            with self.subTest(role=role):
+                self.assertEqual(ROLE_NAMES[role], f"buffer{role - 5}")
+                self.assertEqual(ROLE_DEMAND_WEIGHTS[role], 2.0)
+        self.assertEqual(ROLE_DEMAND_WEIGHTS[3], 3.0)
+        self.assertEqual(ROLE_DEMAND_WEIGHTS[4], 4.0)
+        self.assertEqual(ROLE_DEMAND_WEIGHTS[2], 5.0)
+
+    def test_demand_aware_mode_uses_dijkstra_for_weighted_route_costs(self):
+        graph = ModularRobotGraph()
+        graph.add_node("B1", "battery")
+        for module in ("A", "C", "D", "M"):
+            graph.add_node(module, "relay" if module != "M" else "action")
+        graph.add_switch_edge("B1", "A", "S_B1_A", cost=1.0)
+        graph.add_switch_edge("A", "M", "S_A_M", cost=10.0)
+        graph.add_switch_edge("B1", "C", "S_B1_C", cost=1.0)
+        graph.add_switch_edge("C", "D", "S_C_D", cost=1.0)
+        graph.add_switch_edge("D", "M", "S_D_M", cost=1.0)
+
+        bfs_plan = graph.recommend_demand_aware_switch_plan(
+            active_modules=["M"],
+            module_weights={"M": 5.0},
+            weighted=False,
+            respect_switch_state=False,
+        )
+        dijkstra_plan = graph.recommend_demand_aware_switch_plan(
+            active_modules=["M"],
+            module_weights={"M": 5.0},
+            weighted=True,
+            respect_switch_state=False,
+            route_loss_factor=0.1,
+        )
+
+        self.assertEqual(bfs_plan["assignments"]["M"].path_nodes, ["B1", "A", "M"])
+        self.assertEqual(bfs_plan["assignments"]["M"].distance, 2.0)
+        self.assertEqual(
+            dijkstra_plan["assignments"]["M"].path_nodes,
+            ["B1", "C", "D", "M"],
+        )
+        self.assertEqual(dijkstra_plan["assignments"]["M"].distance, 3.0)
+        self.assertAlmostEqual(dijkstra_plan["battery_effective_drain"]["B1"], 6.5)
+
+        with self.assertRaisesRegex(ValueError, "route_loss_factor"):
+            graph.recommend_demand_aware_switch_plan(
+                active_modules=["M"],
+                module_weights={"M": 5.0},
+                route_loss_factor=-0.1,
+            )
 
     def test_user_rotation_example_maps_local_switches_to_expected_neighbors(self):
         graph = ModularRobotGraph.from_grid_json(SAMPLE_ROLE_LAYOUT)
@@ -122,7 +195,7 @@ class RotatedGridTests(unittest.TestCase):
         self.assertIsNone(graph.switch_info["M2.bottom"].neighbor)
         self.assertIsNone(graph.switch_info["M2.right"].neighbor)
 
-    def test_sample_balanced_plan_uses_unused_relay_and_counts_only_loads(self):
+    def test_sample_plan_counts_empty_and_buffer_roles_as_loads(self):
         graph = ModularRobotGraph.from_grid_json(
             SAMPLE_ROLE_LAYOUT,
             default_closed=False,
@@ -133,11 +206,17 @@ class RotatedGridTests(unittest.TestCase):
 
         self.assertTrue(plan["safe_to_apply"])
         self.assertEqual(plan["battery_conflicts"], [])
-        self.assertEqual(plan["battery_loads"], {"M3": 2})
+        self.assertEqual(plan["battery_loads"], {"M3": 5})
         self.assertEqual(plan["unreachable_modules"], [])
         self.assertEqual(
             plan["required_links"],
-            [("M1", "M2"), ("M2", "M3"), ("M3", "M4")],
+            [
+                ("M1", "M2"),
+                ("M2", "M3"),
+                ("M3", "M4"),
+                ("M4", "M5"),
+                ("M4", "M6"),
+            ],
         )
         self.assertEqual(
             plan["required_closed_switches"],
@@ -147,7 +226,11 @@ class RotatedGridTests(unittest.TestCase):
                 "M2.top",
                 "M3.left",
                 "M3.top",
+                "M4.bottom",
+                "M4.left",
                 "M4.right",
+                "M5.left",
+                "M6.right",
             ],
         )
 

@@ -12,6 +12,14 @@
 > this new gate is necessary. Electrical current, voltage, loss, and hardware
 > interlocks are still outside the model.
 
+> **Demand-aware extension:** roles 2–16 are now powered loads with default
+> weights motor=5, navigation=4, CPU=3, buffer1–11=2, and empty=1.
+> `recommend_demand_aware_switch_plan()` combines per-battery BFS routes
+> with a bounded exact, battery-isolated global assignment. With unknown switch
+> loss, its default lexicographic objective minimizes peak module demand,
+> demand spread, variance, and only then total demand-weighted route cost; an
+> optional `route_loss_factor` supports later sensitivity studies.
+
 ## Executive summary
 
 1. The repository's **dual-mode** method is a centralized multi-source shortest-path algorithm. Planning mode searches the complete physical graph; runtime mode searches only currently enabled links. In unweighted mode, and in weighted mode with strictly positive traversed costs, its selected parent edges form a battery-rooted forest. The current weighted code also accepts zero-cost edges; in that edge case, one battery can be reparented through another domain and the switch union can join sources.

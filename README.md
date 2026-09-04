@@ -9,7 +9,10 @@ The robot is modeled as a graph:
 - Each edge is governed by a switch.
 - Power loss is modeled by the number of traversed switches, or more generally by a per-edge cost.
 
-With identical switch losses, the unweighted problem is solved with BFS. When different switches or links have different losses, the same framework switches to Dijkstra.
+The current role-aware requirement assumes identical switch losses, so its
+routing path uses BFS by default. Some legacy prototypes still expose Dijkstra
+for backward-compatible weighted-cost experiments; demand-aware balanced mode
+does not require it under the current hardware model.
 
 ## Current Scope
 
@@ -42,7 +45,8 @@ Across the repo, the common assumptions are:
 
 - Each action module is assigned to one battery at a time.
 - The routing cost is the number of traversed links in unweighted mode. Legacy links use one switch; role-aware rotated-layout links use two endpoint switches per link, so minimizing hops also minimizes traversed switches.
-- Weighted mode uses `Edge.cost` and Dijkstra.
+- Legacy weighted mode uses `Edge.cost` and Dijkstra; current role-aware routing
+  uses equal-cost BFS.
 - A disconnected module is reported as unreachable with infinite distance.
 - Switch plans are derived from the union of the selected shortest paths.
 
@@ -69,7 +73,7 @@ This is the minimal educational version.
 
 - Defines a small undirected graph with switch-controlled edges.
 - Implements single-source BFS for unit-cost routing.
-- Implements single-source Dijkstra for future weighted losses.
+- Retains single-source Dijkstra for legacy weighted-cost experiments.
 - Builds a simple battery-to-module distance table.
 - Includes `demo_l_shape()` for a line-shaped example with two batteries.
 
@@ -112,6 +116,7 @@ There are two related ideas here:
 - `dynamic_load_balanced_assignment(...)`: assign modules one by one, breaking ties by current battery load
 - `rebalanced_nearest_battery_assignment(...)`: start from the original nearest-battery solution, then move only modules that have another battery at exactly the same shortest distance
 - `recommend_balanced_switch_plan(...)`: turn the balanced assignments into endpoint switch states and fail closed on a multi-battery connected component
+- `recommend_demand_aware_switch_plan(...)`: use role demand weights, BFS route candidates, and a bounded exact global search to minimize peak battery drain before route cost
 
 The second method is the main one demonstrated in the file. It preserves shortest-path distance (within `math.isclose` tolerance in weighted mode) while applying only strictly improving equal-distance reassignments.
 
@@ -124,6 +129,26 @@ The balancing objective is heuristic but clear:
 Equal-objective moves now use a persistent deterministic comparison key, removing the earlier last-scanned/input-order tie bug documented in the study.
 
 So this file is a good next step if the routing should still be "nearest" but you do not want lexicographic tie-breaking to overload one battery unnecessarily.
+
+Demand-aware mode addresses the stronger lifetime problem. Its default objective
+is lexicographic rather than an arbitrary weighted sum: minimize maximum battery
+demand, then demand spread, variance, total demand-weighted path cost, and finally
+the number of closed switches. Because every physical adjacency closes the same
+two endpoint switches, every module-to-battery candidate is a minimum-hop BFS
+path. The optional `route_loss_factor` remains zero until
+switch-loss measurements are available; when supplied, effective drain becomes
+`demand * (1 + route_loss_factor * route_cost)`.
+
+The zero default is not a claim that physical switch loss is zero. It means the
+unknown coefficient is not allowed to change the known demand-priority order;
+minimum path cost remains a later lexicographic objective. Once measured, the
+coefficient can be supplied for sensitivity analysis or unified effective-drain
+optimization.
+
+The bounded search reports `search_complete`. A complete result is exact over
+one deterministic minimum-cost path per module/battery pair; equal-cost path
+variants, nonlinear battery behavior, current/voltage limits, and link
+congestion remain outside the model.
 
 ### [power_routing_dynamic.py](/Users/hongxuan/Documents/MRPR/power_routing_dynamic.py)
 
@@ -288,7 +313,7 @@ plan = g.recommend_switch_plan(
 print(plan["required_open_switches"])
 ```
 
-## Role-Aware Layout JSON in Balanced Mode
+## Role-Aware Layout JSON in Balanced and Demand-Aware Modes
 
 `power_routing_balanced.py` accepts the row-major rotated layout format used by
 the modular robot controller:
@@ -313,17 +338,17 @@ plan = graph.recommend_balanced_switch_plan(
     respect_switch_state=False,  # plan over the complete physical topology
 )
 
-print(plan["battery_loads"])               # {'M3': 2}
+print(plan["battery_loads"])               # {'M3': 5}; roles 2–16 all consume power
 print(plan["required_closed_switches"])
 print(plan["safe_to_apply"])               # True
 ```
 
 The three values after the rotation are `[role, digital_io, unused]`. Role 1 is
-a battery; roles 2, 3, and 4 are powered loads; role 5 and all other currently
-undefined roles—including role 8—are relay modules. Relays are not counted in
-battery load, but shortest paths may traverse them. The digital-I/O byte is
-stored and exposed as both the integer value and an eight-bit string; it does
-not yet affect optimization.
+a battery. Every role from 2 through 16 is a powered load: motor, CPU,
+navigation, and empty are roles 2/3/4/5; roles 6–16 are buffer1–buffer11.
+Default demand weights are motor=5, navigation=4, CPU=3, every buffer=2, and
+empty=1. The digital-I/O byte is stored and exposed as both the integer value
+and an eight-bit string; it does not yet affect optimization.
 
 The first `cells` row is the physical top row. Every module gets `.top`,
 `.right`, `.bottom`, and `.left` local switch IDs. Rotation is counter-clockwise.
@@ -356,6 +381,15 @@ The reproducible 4×4 / three-battery example (seed `20260828`) can be run with:
 python3 examples/demo_balanced_role_layout.py \
   --input examples/complex_4x4_role_layout.json \
   --output output/balanced_complex_4x4_demo.svg
+```
+
+Run the same topology with demand-aware optimization:
+
+```bash
+python3 examples/demo_balanced_role_layout.py \
+  --optimizer demand \
+  --input examples/complex_4x4_role_layout.json \
+  --output output/demand_aware_complex_4x4_demo.svg
 ```
 
 In the generated SVG, module fill colors encode module type, colored links encode
